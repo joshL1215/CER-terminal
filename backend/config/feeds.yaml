@@ -1,0 +1,57 @@
+# RSS feed registry for the news ingest job.
+#
+# Each entry under `feeds` describes one RSS/Atom feed. Anything set under
+# `defaults` applies to every feed unless the feed overrides it.
+#
+# Fields:
+#   id           (required) unique slug: lowercase letters, digits, hyphens
+#   name         (required) human-readable source name
+#   url          (required) http(s) URL of the RSS/Atom feed
+#   source_type  one of: news, trade, government, research, utility, other
+#   category     broad topic bucket, e.g. grid, solar, policy, markets
+#   tags         list of free-form labels
+#   active       set to false to skip the feed without deleting it
+#   llm_context  short note passed to the LLM to help judge relevance
+
+version: 1
+
+defaults:
+  active: true
+  source_type: news
+  category: general
+  tags: []
+
+feeds:
+  - id: eia-today-in-energy
+    name: EIA Today in Energy
+    url: https://www.eia.gov/rss/todayinenergy.xml
+    source_type: government
+    category: markets
+    tags: [eia, data, us]
+    llm_context: >
+      U.S. Energy Information Administration daily data briefs. Almost always
+      relevant; keep unless clearly off-topic.
+
+  - id: utility-dive
+    name: Utility Dive
+    url: https://www.utilitydive.com/feeds/news/
+    source_type: trade
+    category: grid
+    tags: [utilities, regulation, grid]
+    llm_context: Utility industry trade press covering regulation, rates, and grid operations.
+
+  - id: canary-media
+    name: Canary Media
+    url: https://www.canarymedia.com/rss.rss
+    category: clean-energy
+    tags: [decarbonization, renewables]
+
+  - id: electrek
+    name: Electrek
+    url: https://electrek.co/feed/
+    category: transportation
+    tags: [ev, consumer]
+    active: false
+    llm_context: >
+      Consumer EV news with many product reviews and deals. Only keep articles
+      about charging infrastructure, grid impacts, batteries, or policy.

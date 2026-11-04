@@ -1,13 +1,13 @@
-# Backend
+# Ingest
 
-Python backend for the energy terminal: RSS ingest, LLM relevance filtering, and (later) the API.
+Daily RSS ingest and LLM relevance filtering for the energy terminal, run by a scheduled GitHub Actions job.
 
 ## Setup
 
 Requires [uv](https://docs.astral.sh/uv/) (it will install Python 3.12 automatically).
 
 ```sh
-cd backend
+cd ingest
 uv sync
 uv run pytest
 ```

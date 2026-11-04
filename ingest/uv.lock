@@ -21,7 +21,7 @@ wheels = [
 ]
 
 [[package]]
-name = "energy-terminal-backend"
+name = "energy-terminal-ingest"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

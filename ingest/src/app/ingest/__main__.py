@@ -21,7 +21,7 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--feeds", default=DEFAULT_FEEDS_PATH, help="path to feeds.yaml")
     parser.add_argument("--rules", default=DEFAULT_RULES_PATH, help="path to rules.yaml")
     parser.add_argument("--skip-classify", action="store_true", help="fetch only, no LLM calls")
-    parser.add_argument("--batch-size", type=int, default=40, help="articles per LLM call")
+    parser.add_argument("--batch-size", type=int, default=20, help="articles per LLM call")
     parser.add_argument("--max-batches", type=int, default=25, help="LLM calls per run")
     return parser.parse_args(argv)
 

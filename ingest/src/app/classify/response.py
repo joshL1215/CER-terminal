@@ -30,7 +30,8 @@ def parse_decisions(
 ) -> dict[int, Decision]:
     """Decisions keyed by article id; ids the LLM skipped are simply absent.
 
-    Unknown ids are ignored, and categories outside the allowed list become None.
+    Unknown ids are ignored. Category is None for rejected articles and for values
+    outside the allowed list.
     """
     cleaned = _FENCE.sub("", text.strip())
     try:
@@ -46,7 +47,7 @@ def parse_decisions(
         category = (decision.category or "").strip().lower()
         decisions[decision.id] = decision.model_copy(
             update={
-                "category": category if category in categories else None,
+                "category": category if decision.keep and category in categories else None,
                 "reason": " ".join(decision.reason.split())[:MAX_REASON_LENGTH],
             }
         )

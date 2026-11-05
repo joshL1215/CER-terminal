@@ -47,7 +47,7 @@ def _load_batch(
                 title=article.title,
                 description=article.description,
                 source=feeds[article.feed_id].name,
-                source_category=feeds[article.feed_id].category,
+                source_topic=feeds[article.feed_id].category,
                 source_context=feeds[article.feed_id].llm_context,
             )
             for article in articles
@@ -77,7 +77,7 @@ def classify_pending(
     providers: list[Provider],
     client: ChatClient,
     *,
-    batch_size: int = 40,
+    batch_size: int = 20,
     max_batches: int = 25,
     max_attempts: int = 3,
     sleep: Callable[[float], None] = time.sleep,

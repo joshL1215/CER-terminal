@@ -1,0 +1,49 @@
+# Relevance rules the LLM uses to decide which articles to keep.
+#
+# PLACEHOLDER: these rules are a starting point written by the dev team. Replace
+# them with criteria agreed with the Center for Energy Research, and bump
+# `version` whenever they change (it is stored with every decision).
+#
+# Fields:
+#   version         (required) label stored as articles.rules_version
+#   categories      (required) categories the LLM may assign to kept articles
+#   keep            guidance for articles to keep
+#   reject          guidance for articles to reject
+#   keyword_reject  case-insensitive phrases; a title containing one is rejected
+#                   without calling the LLM
+
+version: placeholder-2026-11
+
+categories:
+  - grid
+  - generation
+  - storage
+  - markets
+  - policy
+  - transportation
+  - buildings
+  - research
+  - other
+
+keep:
+  - Electric grid operations, transmission, distribution, reliability, and interconnection
+  - Power generation of any kind (solar, wind, hydro, nuclear, gas, coal, geothermal)
+  - Energy storage and batteries at utility or commercial scale
+  - Energy markets, prices, utility rates, and major energy company or utility business news
+  - Energy and climate policy, regulation, legislation, and government programs
+  - Decarbonization, emissions, and energy transition analysis
+  - Energy research, data releases, and technical reports
+  - EV charging infrastructure and the grid impact of electrification
+
+reject:
+  - Consumer product deals, discounts, giveaways, and shopping guides
+  - Celebrity, entertainment, or lifestyle stories
+  - Individual product reviews (cars, gadgets) without wider energy relevance
+  - General tech or business news with no clear energy angle
+  - Opinion pieces with no new facts, data, or policy content
+
+keyword_reject:
+  - "deal of the day"
+  - "black friday"
+  - "giveaway"
+  - "coupon"

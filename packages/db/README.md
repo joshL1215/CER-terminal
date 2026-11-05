@@ -48,6 +48,16 @@ uv run alembic revision --autogenerate -m "message"  # after editing src/cer_db/
 On Supabase, use the **session pooler** connection string for GitHub Actions: the direct
 connection is IPv6-only on the free plan and Actions runners don't support IPv6.
 
+## Public read access (Supabase Data API)
+
+The frontend reads through the Supabase Data API with the public `anon` key. Row-level security
+limits that key to **reading kept articles and active feeds**; it can't see other rows or write
+anything. Services connecting as `postgres` (the table owner) bypass RLS.
+
+Dashboard settings: **Integrations → Data API**: Data API on, "Automatically expose new tables"
+off. The grants and policies themselves are in a migration, so `alembic upgrade head` applies them.
+New tables are private to the Data API unless a migration grants access.
+
 ## Tests
 
 ```sh

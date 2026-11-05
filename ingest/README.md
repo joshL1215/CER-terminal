@@ -41,32 +41,15 @@ fields, duplicate ids/URLs, duplicate YAML keys, bad slugs, or non-http(s) URLs.
 
 ## Database
 
-This service owns the schema (Postgres in production). Other services read the tables but don't
-migrate them.
+Tables, connection setup, and migrations come from the shared
+[`cer-db`](../packages/db/README.md) package (`from cer_db import Article, session_scope, ...`).
+Run migrations from `packages/db/`.
 
-| Table      | Contents                                                                          |
-| ---------- | --------------------------------------------------------------------------------- |
-| `feeds`    | Mirror of `feeds.yaml` (synced each run) plus fetch state: ETag, failures, errors |
-| `articles` | One row per unique article (deduped by canonical-URL hash) and its LLM decision   |
+This service's own queries live in `src/app/repository/`:
 
-Article `status` goes `pending` → `kept` / `rejected`, or `failed` after repeated LLM errors.
+- `feeds.py`: `sync_feeds`, `get_feed`, `record_fetch_success`, `record_fetch_failure`
+- `articles.py`: `insert_new_articles`, `get_pending_articles`, `record_classifications`,
+  `record_classification_failure`
 
-Set `DATABASE_URL` (a plain `postgresql://` URL from Supabase works), then:
-
-```sh
-uv run alembic upgrade head                          # create/upgrade tables
-uv run alembic revision --autogenerate -m "message"  # after editing src/app/db/models.py
-```
-
-On Supabase, use the **session pooler** connection string for GitHub Actions: the direct
-connection is IPv6-only on the free plan and Actions runners don't support IPv6.
-
-Queries the ingest job uses live in `app/db/repository.py` (`sync_feeds`, `insert_new_articles`,
-`get_pending_articles`, `record_classifications`, ...). Wrap them in `session_scope(...)`.
-
-Tests use SQLite by default. To also run them against a disposable Postgres database (its tables
-get dropped):
-
-```sh
-TEST_DATABASE_URL=postgresql://... uv run pytest
-```
+Wrap them in `session_scope(...)`. Tests use SQLite by default; set `TEST_DATABASE_URL` to a
+disposable Postgres database to run them there too (its tables get dropped).

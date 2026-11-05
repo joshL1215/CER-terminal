@@ -1,10 +1,10 @@
-from app.db import (
+from app.feeds import parse_feed_registry
+from app.repository import (
     get_feed,
     record_fetch_failure,
     record_fetch_success,
     sync_feeds,
 )
-from app.feeds import parse_feed_registry
 
 
 def test_sync_feeds_inserts_metadata(session, feeds):

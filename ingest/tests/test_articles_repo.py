@@ -1,12 +1,11 @@
 from datetime import UTC, datetime, timedelta
 
 import pytest
+from cer_db import Article, ArticleStatus
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
-from app.db import (
-    Article,
-    ArticleStatus,
+from app.repository import (
     Classification,
     NewArticle,
     count_pending_articles,

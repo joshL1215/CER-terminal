@@ -2,12 +2,12 @@
 
 from datetime import UTC, datetime
 
+from cer_db import FeedRecord
 from sqlalchemy import update
 from sqlalchemy.orm import Session
 
 from app.feeds import FeedRegistry
 
-from ..models import FeedRecord
 from ._upsert import upsert_insert
 
 MAX_ERROR_LENGTH = 2000

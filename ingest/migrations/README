@@ -1,0 +1,4 @@
+Alembic migrations for the ingest service's schema (src/app/db/models.py).
+
+    uv run alembic upgrade head                          # apply migrations to $DATABASE_URL
+    uv run alembic revision --autogenerate -m "message"  # after changing models.py; review the output

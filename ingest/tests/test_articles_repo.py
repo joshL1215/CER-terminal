@@ -8,177 +8,19 @@ from app.db import (
     Article,
     ArticleStatus,
     Classification,
-    DatabaseConfigError,
-    FeedRecord,
     NewArticle,
     count_pending_articles,
-    database_url_from_env,
-    get_feed,
     get_pending_articles,
     insert_new_articles,
     record_classification_failure,
     record_classifications,
-    record_fetch_failure,
-    record_fetch_success,
-    session_scope,
-    sync_feeds,
 )
-from app.db.engine import make_session_factory
-from app.feeds import parse_feed_registry
-
-REGISTRY_YAML = """
-version: 1
-feeds:
-  - id: alpha
-    name: Alpha News
-    url: https://alpha.example.com/rss
-    category: Grid
-    tags: [utilities]
-    llm_context: Alpha context.
-  - id: beta
-    name: Beta
-    url: https://beta.example.com/rss
-    active: false
-"""
-
-
-@pytest.fixture
-def feeds(session):
-    sync_feeds(session, parse_feed_registry(REGISTRY_YAML))
-    session.commit()
 
 
 def article(n: int, feed_id: str = "alpha", **kwargs) -> NewArticle:
     return NewArticle(
         feed_id=feed_id, url=f"https://alpha.example.com/story-{n}", title=f"Story {n}", **kwargs
     )
-
-
-# --- engine -------------------------------------------------------------------
-
-
-@pytest.mark.parametrize(
-    ("raw", "expected"),
-    [
-        ("postgres://u:p@h:5432/db", "postgresql+psycopg://u:p@h:5432/db"),
-        ("postgresql://u:p@h:5432/db", "postgresql+psycopg://u:p@h:5432/db"),
-        ("postgresql+psycopg://u:p@h/db", "postgresql+psycopg://u:p@h/db"),
-        ("sqlite:///local.db", "sqlite:///local.db"),
-    ],
-)
-def test_database_url_from_env(monkeypatch, raw, expected):
-    monkeypatch.setenv("DATABASE_URL", raw)
-    assert database_url_from_env() == expected
-
-
-def test_database_url_missing(monkeypatch):
-    monkeypatch.delenv("DATABASE_URL", raising=False)
-    with pytest.raises(DatabaseConfigError):
-        database_url_from_env()
-
-
-def test_session_scope_commits_and_rolls_back(engine):
-    factory = make_session_factory(engine)
-    registry = parse_feed_registry(REGISTRY_YAML)
-
-    with pytest.raises(RuntimeError), session_scope(factory) as session:
-        sync_feeds(session, registry)
-        raise RuntimeError("boom")
-    with factory() as session:
-        assert session.scalars(select(FeedRecord)).all() == []
-
-    with session_scope(factory) as session:
-        sync_feeds(session, registry)
-    with factory() as session:
-        assert len(session.scalars(select(FeedRecord)).all()) == 2
-
-
-# --- feeds --------------------------------------------------------------------
-
-
-def test_sync_feeds_inserts_metadata(session, feeds):
-    alpha = get_feed(session, "alpha")
-    assert alpha.name == "Alpha News"
-    assert alpha.category == "grid"
-    assert alpha.tags == ["utilities"]
-    assert alpha.source_type == "news"
-    assert alpha.llm_context == "Alpha context."
-    assert alpha.active is True
-    assert alpha.consecutive_failures == 0
-    assert get_feed(session, "beta").active is False
-
-
-def test_sync_feeds_updates_and_deactivates_without_touching_fetch_state(session, feeds):
-    record_fetch_success(session, "alpha", etag='"v1"', last_modified="Mon, 01 Jan 2026")
-    session.commit()
-
-    updated = parse_feed_registry(
-        """
-        version: 1
-        feeds:
-          - id: alpha
-            name: Alpha Renamed
-            url: https://alpha.example.com/rss
-            tags: [grid, policy]
-        """
-    )
-    sync_feeds(session, updated)
-    session.commit()
-    session.expire_all()
-
-    alpha = get_feed(session, "alpha")
-    assert alpha.name == "Alpha Renamed"
-    assert alpha.tags == ["grid", "policy"]
-    assert alpha.etag == '"v1"'
-    assert alpha.last_modified == "Mon, 01 Jan 2026"
-    # Removed from the YAML: kept for article history, but inactive.
-    assert get_feed(session, "beta").active is False
-
-
-def test_sync_feeds_deactivates_removed_feed(session):
-    sync_feeds(
-        session,
-        parse_feed_registry(
-            "version: 1\nfeeds:\n"
-            "  - {id: a, name: A, url: 'https://a.example.com/rss'}\n"
-            "  - {id: b, name: B, url: 'https://b.example.com/rss'}\n"
-        ),
-    )
-    session.commit()
-    sync_feeds(
-        session,
-        parse_feed_registry(
-            "version: 1\nfeeds: [{id: a, name: A, url: 'https://a.example.com/rss'}]"
-        ),
-    )
-    session.commit()
-    session.expire_all()
-    assert get_feed(session, "a").active is True
-    assert get_feed(session, "b").active is False
-
-
-def test_fetch_failure_then_success(session, feeds):
-    record_fetch_failure(session, "alpha", "timeout")
-    record_fetch_failure(session, "alpha", "x" * 5000)
-    session.commit()
-    session.expire_all()
-    alpha = get_feed(session, "alpha")
-    assert alpha.consecutive_failures == 2
-    assert len(alpha.last_error) == 2000
-    assert alpha.last_success_at is None
-    assert alpha.last_fetched_at is not None
-
-    record_fetch_success(session, "alpha", etag='"v2"')
-    session.commit()
-    session.expire_all()
-    alpha = get_feed(session, "alpha")
-    assert alpha.consecutive_failures == 0
-    assert alpha.last_error is None
-    assert alpha.etag == '"v2"'
-    assert alpha.last_success_at is not None
-
-
-# --- articles -----------------------------------------------------------------
 
 
 def test_insert_new_articles_dedupes_within_batch_and_across_runs(session, feeds):

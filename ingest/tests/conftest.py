@@ -8,7 +8,8 @@ import os
 
 import pytest
 
-from app.db import Base, make_engine, make_session_factory
+from app.db import Base, make_engine, make_session_factory, sync_feeds
+from app.feeds import parse_feed_registry
 
 TEST_DATABASE_URL = os.environ.get("TEST_DATABASE_URL")
 BACKENDS = ["sqlite"] + (["postgresql"] if TEST_DATABASE_URL else [])
@@ -45,3 +46,31 @@ def session(engine):
     with factory() as session:
         yield session
         session.rollback()
+
+
+REGISTRY_YAML = """
+version: 1
+feeds:
+  - id: alpha
+    name: Alpha News
+    url: https://alpha.example.com/rss
+    category: Grid
+    tags: [utilities]
+    llm_context: Alpha context.
+  - id: beta
+    name: Beta
+    url: https://beta.example.com/rss
+    active: false
+"""
+
+
+@pytest.fixture
+def registry():
+    return parse_feed_registry(REGISTRY_YAML)
+
+
+@pytest.fixture
+def feeds(session, registry):
+    """Sync REGISTRY_YAML's feeds (alpha active, beta inactive) into the DB."""
+    sync_feeds(session, registry)
+    session.commit()

@@ -1,0 +1,40 @@
+# Literal words/phrases, matched without regard to case or punctuation.
+# Add plural forms and synonyms explicitly; this filter does not infer meaning.
+# Topic + exclusion matches -> needs_review, rather than automatic rejection.
+# No matches -> needs_review, so unfamiliar topics are not silently discarded.
+version: 1
+
+topics:
+  oil:
+    - oil
+    - petroleum
+  gas:
+    - natural gas
+    - LNG
+  coal:
+    - coal
+  evs:
+    - EV
+    - EVs
+    - electric vehicle
+    - electric vehicles
+    - charging infrastructure
+  renewables:
+    - solar
+    - wind power
+    - wind energy
+    - renewable energy
+    - renewables
+  grid:
+    - power grid
+    - electricity demand
+    - battery storage
+    - energy storage
+  energy-policy:
+    - energy policy
+    - carbon tax
+    - fossil fuel
+    - fossil fuels
+    - decarbonization
+
+exclusions: []

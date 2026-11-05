@@ -39,6 +39,47 @@ for feed in registry.active():
 The loader fails fast with a readable error (`feeds[1] (utility-dive).url: ...`) on unknown
 fields, duplicate ids/URLs, duplicate YAML keys, bad slugs, or non-http(s) URLs.
 
+## Keyword relevance filter
+
+The local filter checks article titles and descriptions against
+[`config/filter_rules.yaml`](config/filter_rules.yaml). It needs no database, API key, or network
+access and does not change article database statuses.
+
+```python
+from app.filtering.rules import filter_article, load_filter_rules
+
+rules = load_filter_rules()  # load once; optionally pass a custom YAML path
+result = filter_article(
+    title="Coal consumption falls as solar generation increases",
+    description=None,
+    rules=rules,
+)
+print(result.decision.value)  # relevant
+print(result.topics)          # ('coal', 'renewables')
+print(result.matched_keywords)  # ('coal', 'solar')
+```
+
+Configure literal keywords under `topics` and unwanted phrases under `exclusions`. Matching ignores
+case, HTML markup, whitespace, and punctuation, and uses whole words/phrases (`oil` does not match
+`soil`). Add plurals and synonyms explicitly. Phrases must occur within the title or description,
+not across both fields. Invalid rules and duplicate YAML keys raise `FilterConfigError`.
+
+| Matches | Decision |
+| --- | --- |
+| Topic keywords only | `relevant` |
+| Exclusions only | `irrelevant` |
+| Both, or neither | `needs_review` |
+
+Results include matched topics, keywords, exclusions, and an explanation. These are heuristic topic
+hints, not verified research conclusions. Keep uncertain articles for later human or LLM review;
+this filter is not yet wired into an ingestion pipeline.
+
+Run its sample-based tests locally:
+
+```sh
+uv run pytest tests/test_filter_rules.py
+```
+
 ## Database
 
 Tables, connection setup, and migrations come from the shared

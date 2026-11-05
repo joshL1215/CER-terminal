@@ -1,0 +1,538 @@
+{
+ "generated": "2026-10-29T20:42:37.246504+00:00",
+ "feeds": [
+  {
+   "id": "carbon-brief",
+   "name": "Carbon Brief",
+   "url": "https://www.carbonbrief.org/feed/",
+   "category": "policy",
+   "tags": [
+    "climate",
+    "analysis"
+   ]
+  },
+  {
+   "id": "cleantechnica",
+   "name": "CleanTechnica",
+   "url": "https://cleantechnica.com/feed/",
+   "category": "clean-energy",
+   "tags": [
+    "renewables",
+    "ev"
+   ]
+  },
+  {
+   "id": "eia-today-in-energy",
+   "name": "EIA Today in Energy",
+   "url": "https://www.eia.gov/rss/todayinenergy.xml",
+   "category": "markets",
+   "tags": [
+    "eia",
+    "data",
+    "us"
+   ]
+  },
+  {
+   "id": "electrek",
+   "name": "Electrek",
+   "url": "https://electrek.co/feed/",
+   "category": "transportation",
+   "tags": [
+    "ev",
+    "consumer"
+   ]
+  },
+  {
+   "id": "grist",
+   "name": "Grist",
+   "url": "https://grist.org/feed/",
+   "category": "policy",
+   "tags": [
+    "climate"
+   ]
+  },
+  {
+   "id": "pv-magazine",
+   "name": "PV Magazine",
+   "url": "https://www.pv-magazine.com/feed/",
+   "category": "generation",
+   "tags": [
+    "solar",
+    "trade"
+   ]
+  },
+  {
+   "id": "reneweconomy",
+   "name": "RenewEconomy",
+   "url": "https://reneweconomy.com.au/feed/",
+   "category": "clean-energy",
+   "tags": [
+    "australia",
+    "renewables"
+   ]
+  },
+  {
+   "id": "utility-dive",
+   "name": "Utility Dive",
+   "url": "https://www.utilitydive.com/feeds/news/",
+   "category": "grid",
+   "tags": [
+    "utilities",
+    "regulation",
+    "grid"
+   ]
+  }
+ ],
+ "articles": [
+  {
+   "id": 1,
+   "url": "https://www.eia.gov/todayinenergy/detail.php?id=68084",
+   "title": "Weekly average load in ERCOT continues near record high",
+   "description": "Sustained high temperatures have contributed to persistently high electricity demand in the Electric Reliability Council of Texas (ERCOT), the regional transmission organization for most of the state.",
+   "published_at": "2026-09-03T09:00:00-05:00",
+   "category": "grid",
+   "feed_id": "eia-today-in-energy"
+  },
+  {
+   "id": 2,
+   "url": "https://www.eia.gov/todayinenergy/detail.php?id=68224",
+   "title": "U.S. electricity use for electric vehicles increasing at a slower pace in 2026",
+   "description": "We estimate light-duty electric vehicles in the United States consumed 8% more electricity during the first six months of 2026 than in the last half of 2025 (2H25) in our Monthly Energy Review, down from the 13-24% growth seen in six-month periods in recent years. The slowing electric vehicle electricity consumption growth followed a decline in sales after U.S. federal tax credits expired in Septe",
+   "published_at": "2026-09-30T09:00:00-05:00",
+   "category": "transportation",
+   "feed_id": "eia-today-in-energy"
+  },
+  {
+   "id": 3,
+   "url": "https://www.eia.gov/todayinenergy/detail.php?id=68305",
+   "title": "PJM, ERCOT, and SWPP all set peak load records this summer",
+   "description": "Three regional transmission organizations (RTOs) set records for peak hourly load this past summer, according to data reported on Form EIA-930 and presented in the Hourly Electric Grid Monitor.",
+   "published_at": "2026-10-15T09:00:00-05:00",
+   "category": "grid",
+   "feed_id": "eia-today-in-energy"
+  },
+  {
+   "id": 4,
+   "url": "https://www.eia.gov/todayinenergy/detail.php?id=68324",
+   "title": "U.S. small-scale solar generation has quadrupled in the last decade",
+   "description": "We estimate that U.S. generation from small-scale or rooftop solar photovoltaic systems (smaller than 1 megawatt of capacity) has increased from 18,812 gigawatthours (GWh) to 92,979 GWh over the last decade. The four states with the highest generation of small-scale solar in the country-California, Arizona, Texas, and Florida-are in regions with more abundant solar resources. Even though it is in",
+   "published_at": "2026-10-16T09:00:00-05:00",
+   "category": "generation",
+   "feed_id": "eia-today-in-energy"
+  },
+  {
+   "id": 5,
+   "url": "https://www.eia.gov/todayinenergy/detail.php?id=68325",
+   "title": "Hybrid sales rise while battery electric sales remain lower after tax credit expiration",
+   "description": "In the third quarter of 2026 (3Q26), 23% of new light-duty vehicles sold in the United States were hybrid electric, battery electric, or plug-in hybrid electric vehicles, down slightly from 24% in 3Q25. Between 3Q25 and 3Q26, hybrid electric vehicles continued to gain market share, reaching 16% of light-duty vehicle sales. Growth of hybrid electric vehicle sales has slowed this quarter as the aver",
+   "published_at": "2026-10-19T09:00:00-05:00",
+   "category": "storage",
+   "feed_id": "eia-today-in-energy"
+  },
+  {
+   "id": 6,
+   "url": "https://www.carbonbrief.org/chart-a-record-two-thirds-of-car-sales-in-china-are-now-electric-vehicles",
+   "title": "Chart: A record two-thirds of car sales in China are now electric vehicles",
+   "description": "For the first time, new-energy vehicles (NEVs) made up 67% of new car sales in China in September, according to&#8230;",
+   "published_at": "2026-10-23T15:55:26+00:00",
+   "category": "transportation",
+   "feed_id": "carbon-brief"
+  },
+  {
+   "id": 7,
+   "url": "https://grist.org/solutions/california-has-a-plan-for-el-ninos-torrential-rain-save-it-for-later/",
+   "title": "California has a plan for El Niño’s torrential rain: Save it for later",
+   "description": "Historically, the phenomenon has walloped the Golden State with deluges. Here's how it will capture and store that bounty for the dry years ahead.",
+   "published_at": "2026-10-26T08:00:00+00:00",
+   "category": "policy",
+   "feed_id": "grist"
+  },
+  {
+   "id": 8,
+   "url": "https://grist.org/elections/will-lawrence-congress-sunrise-michigan-solar-data-centers/",
+   "title": "The Michigan climate candidate courting opponents of Big Solar",
+   "description": "Sunrise Movement co-founder William Lawrence is navigating backlash against data centers — and clean energy — in his bid for Congress.",
+   "published_at": "2026-10-26T08:45:00+00:00",
+   "category": "generation",
+   "feed_id": "grist"
+  },
+  {
+   "id": 9,
+   "url": "https://cleantechnica.com/2026/10/27/xpeng-tops-customer-satisfaction-ranking-for-second-year-beating-tesla/",
+   "title": "XPENG Tops Customer Satisfaction Ranking For Second Year, Beating Tesla",
+   "description": "XPENG recently ranked highest in the European USCALE &#8220;EV Satisfaction Study&#8221; for the second year in a row. Not only did XPENG top the chart again, but their score improved over the previous year. The leading 82% recommendation rate ranks significantly above the 53% industry average, positioning XPENG ahead of ... [continued] The post XPENG Tops Customer Satisfaction Ranking For S",
+   "published_at": "2026-10-27T16:38:49+00:00",
+   "category": "transportation",
+   "feed_id": "cleantechnica"
+  },
+  {
+   "id": 10,
+   "url": "https://cleantechnica.com/2026/10/27/shipping-factsheet-future-cleantech-architects/",
+   "title": "Future Cleantech Architects Has a Shipping Factsheet Worth Reading",
+   "description": "Shipping decarbonization presents policymakers with a bewildering range of choices. Batteries, biofuels, methanol, ammonia, hydrogen, wind assistance, shore power, nuclear propulsion and onboard carbon capture all compete for attention, despite serving very different vessel types and operating requirements. Future Cleantech Architects (FCA), a German nonprofit think tank that evaluates climate",
+   "published_at": "2026-10-27T17:49:49+00:00",
+   "category": "storage",
+   "feed_id": "cleantechnica"
+  },
+  {
+   "id": 11,
+   "url": "https://cleantechnica.com/2026/10/27/ford-fathom-evs-bidirectional-charging-us-market/",
+   "title": "Look Ma, No Inverter! New Ford Fathom Cuts The Cost Of Bidirectional EV Charging",
+   "description": "Ford's new Fathom electric pickup truck -- which is still under wraps -- comes with a new bidirectional EV charging system that eliminates the cost of an external inverter.",
+   "published_at": "2026-10-27T19:45:45+00:00",
+   "category": "transportation",
+   "feed_id": "cleantechnica"
+  },
+  {
+   "id": 12,
+   "url": "https://www.utilitydive.com/news/california-utilities-aggregators-and-customers-to-benefit-from-new-der-law/873048/",
+   "title": "California utilities, aggregators and customers to benefit from new DER laws: advocates",
+   "description": "One aggregator called device-level telemetry the &ldquo;keystone&rdquo; to extract value from multiple distributed energy resources behind the same meter.",
+   "published_at": "2026-10-28T11:09:44-04:00",
+   "category": "policy",
+   "feed_id": "utility-dive"
+  },
+  {
+   "id": 13,
+   "url": "https://electrek.co/2026/10/28/tesla-semi-fire-i-880-hayward-no-crash/",
+   "title": "Tesla Semi catches fire on I-880 with no crash, closes freeway for 10 hours",
+   "description": "A Tesla Semi caught fire on Interstate 880 in Hayward, California, on Tuesday evening, and there was no crash. The electric truck’s lithium-ion battery burned long enough to keep the southbound freeway closed for about 10 hours. The driver got out unhurt. But a Class 8 electric truck catching fire on its own, in traffic, is something Tesla and its growing list of Semi customers need to ex",
+   "published_at": "2026-10-28T12:34:10+00:00",
+   "category": "storage",
+   "feed_id": "electrek"
+  },
+  {
+   "id": 14,
+   "url": "https://electrek.co/2026/10/28/new-retro-electric-motorcycle-to-debut-at-eicma-with-a-novel-feature-a-second-gear/",
+   "title": "New retro electric motorcycle to debut at EICMA with a novel feature: a second gear",
+   "description": "Most electric motorcycles have something in common: a single-speed transmission. But a British company is preparing to shake things up at this year’s EICMA motorcycle show in Milan, where it will unveil a new electric motorcycle demonstrator featuring an unusual two-speed transmission designed to shift gears without interrupting power delivery.",
+   "published_at": "2026-10-28T13:48:00+00:00",
+   "category": "grid",
+   "feed_id": "electrek"
+  },
+  {
+   "id": 15,
+   "url": "https://electrek.co/2026/10/28/ford-fathom-5000-unicastings-tesla-giga-press/",
+   "title": "Ford casts 5,000 ‘unicastings’ for Fathom EV truck in Tesla-style shift",
+   "description": "Ford has now produced more than 5,000 large aluminum “unicastings” for the Fathom, its upcoming $28,350 midsize electric pickup, as it fine-tunes the process ahead of a 2027 launch. Each truck gets two of them, front and rear, replacing 146 individual parts. It’s the clearest sign yet that Ford is all-in on the manufacturing approach Tesla popularized with its Giga Press six years ago.",
+   "published_at": "2026-10-28T13:56:15+00:00",
+   "category": "transportation",
+   "feed_id": "electrek"
+  },
+  {
+   "id": 16,
+   "url": "https://electrek.co/2026/10/28/catl-pushes-ahead-20-ah-solid-state-ev-batteries-500-wh-kg/",
+   "title": "CATL pushes ahead with 20 Ah solid-state EV batteries, with 500 Wh/kg in sight",
+   "description": "CATL hit another milestone in its solid-state battery development, advancing to 20 Ah cells. The world’s leading battery maker aims to begin small-scale production in 2027.",
+   "published_at": "2026-10-28T15:12:41+00:00",
+   "category": "storage",
+   "feed_id": "electrek"
+  },
+  {
+   "id": 17,
+   "url": "https://cleantechnica.com/2026/10/28/china-second-life-ev-battery-reuse-rules/",
+   "title": "China Steps Back From Promoting Second-Life EV Batteries",
+   "description": "China spent much of the 2010s electrifying urban bus fleets while most countries were still testing whether battery-electric buses could replace diesel. By the end of 2025, it had 551,400 new-energy urban buses, representing 87.5% of the fleet. That early success has brought China to a stage other countries will ... [continued] The post China Steps Back From Promoting Second-Life EV Batterie",
+   "published_at": "2026-10-28T15:15:36+00:00",
+   "category": "storage",
+   "feed_id": "cleantechnica"
+  },
+  {
+   "id": 18,
+   "url": "https://electrek.co/2026/10/28/kias-electric-campervan-has-two-beds-fully-equipped-kitchen/",
+   "title": "Kia’s PV5 electric campervan has two beds and a fully equipped kitchen [Images]",
+   "description": "Kia’s electric campervan, based on the PV5 , includes two double beds, a 200 W solar panel, and a fully equipped kitchen.",
+   "published_at": "2026-10-28T17:15:47+00:00",
+   "category": "generation",
+   "feed_id": "electrek"
+  },
+  {
+   "id": 19,
+   "url": "https://electrek.co/2026/10/28/jackery-homepower-2000-plus-v2-power-station-yozma-in-11-electric-dirt-bike-more/",
+   "title": "Jackery sale drops HomePower 2000 Plus v2 400W solar bundle to $1,479, Yozma IN 11 electric dirt bike exclusive $1,399 low, more",
+   "description": "Leading our midweek edition is the Halloween Sale from Jackery with up to $2,060 off discounts on power stations that is running for a few days into November and even has extra savings in the form of an online crossword game. One notable bundle here is the HomePower 2000 Plus v2 2,048Wh Power Station with 2x 200W solar panels at $1,479 , while other deals start from $199. We also have Yozm",
+   "published_at": "2026-10-28T18:00:00+00:00",
+   "category": "generation",
+   "feed_id": "electrek"
+  },
+  {
+   "id": 20,
+   "url": "https://electrek.co/2026/10/28/volkswagens-ev-battery-recall-reaches-over-85000-with-audi/",
+   "title": "Volkswagen’s EV battery recall reaches over 85,000, with Audi now included",
+   "description": "Volkswagen’s latest recall now extends to Audi, affecting nearly 13,000 Q4 E-Tron and Q4 Sportback E-Tron vehicles globally. And just like with the ID.4, owners are being told to limit charging to 80% of the battery’s capacity.",
+   "published_at": "2026-10-28T18:09:59+00:00",
+   "category": "storage",
+   "feed_id": "electrek"
+  },
+  {
+   "id": 21,
+   "url": "https://electrek.co/2026/10/28/15000-ev-tax-credit-bill-landsman-no-chance/",
+   "title": "Dems introduce new $15,000 EV tax credit bill that has no chance — and that’s a problem",
+   "description": "Rep. Greg Landsman (D-OH) wants to bring back the federal EV tax credit and double it. His new bill, the “21st Century Vehicle Choice Act” (H.R. 10881), would offer up to $15,000 on a new electric vehicle and $8,000 on a used one, and it would make both credits permanent. The problem is that the bill has virtually no chance of becoming law anytime soon. And if EV shoppers start holding ou",
+   "published_at": "2026-10-28T19:38:37+00:00",
+   "category": "transportation",
+   "feed_id": "electrek"
+  },
+  {
+   "id": 22,
+   "url": "https://electrek.co/2026/10/28/used-evs-suddenly-hot-sellers-top-suvs-for-under-25000/",
+   "title": "Used EVs are suddenly hot sellers — Here are the top SUVs for under $25,000",
+   "description": "Don’t want to pay full price? Used EVs with low miles, like the Hyundai IONIQ 5 and Ford Mustang Mach-E, are selling on the secondhand market for $25,000 or less.",
+   "published_at": "2026-10-28T21:11:34+00:00",
+   "category": "transportation",
+   "feed_id": "electrek"
+  },
+  {
+   "id": 23,
+   "url": "https://reneweconomy.com.au/bushfire-smoke-chokes-output-from-solar-farms-even-more-than-100-km-away-researchers-find/?utm_source=rss&utm_medium=rss&utm_campaign=bushfire-smoke-chokes-output-from-solar-farms-even-more-than-100-km-away-researchers-find",
+   "title": "Bushfire smoke chokes output from solar farms, even more than 100 km away, researchers find",
+   "description": "Researchers estimate output from solar farms in worst bushfires would have fallen by up to 70 pct within 50 km of hotspots, and 40 pct in regions more than 150km away.",
+   "published_at": "2026-10-28T22:05:14+00:00",
+   "category": "generation",
+   "feed_id": "reneweconomy"
+  },
+  {
+   "id": 24,
+   "url": "https://reneweconomy.com.au/solar-insiders-podcast-the-utility-the-almond-farm-and-the-landmark-renewable-microgrid/?utm_source=rss&utm_medium=rss&utm_campaign=solar-insiders-podcast-the-utility-the-almond-farm-and-the-landmark-renewable-microgrid",
+   "title": "Solar Insiders Podcast: The utility, the almond farm, and the landmark renewable microgrid",
+   "description": "We talk to the developers of one of Australia's biggest, privately-owned non-mining microgrids, that will power a massive almond farm and slash diesel use by 90 pct. Plus news of the week.",
+   "published_at": "2026-10-28T23:41:38+00:00",
+   "category": "generation",
+   "feed_id": "reneweconomy"
+  },
+  {
+   "id": 25,
+   "url": "https://reneweconomy.com.au/coal-giant-seeks-green-tick-for-another-very-large-four-hour-battery-to-the-north-of-a-very-small-town/?utm_source=rss&utm_medium=rss&utm_campaign=coal-giant-seeks-green-tick-for-another-very-large-four-hour-battery-to-the-north-of-a-very-small-town",
+   "title": "Coal giant seeks green tick for another very large, four-hour battery to the north of a very small town",
+   "description": "New battery project is competing for a sweet spot on the Queensland grid, between an \"accommodation village,\" a substation, and two other battery proposals.",
+   "published_at": "2026-10-29T00:19:18+00:00",
+   "category": "storage",
+   "feed_id": "reneweconomy"
+  },
+  {
+   "id": 26,
+   "url": "https://electrek.co/2026/10/28/when-one-door-closes-polestar-2-production-ends-and-what-might-come-next/",
+   "title": "When one door closes: Polestar 2 production ends, and what might come next",
+   "description": "Forget about the 600+ hp hybrid-powered Polestar 1 supercoupe; the car that established Polestar as a standalone brand was the 2. As the brand pulls out of the US and shifts its focus to the rest of the world, it’s time to look back at the EV that helped define Polestar, along with a look around at some of the best EV deals of all time.",
+   "published_at": "2026-10-29T01:20:27+00:00",
+   "category": "transportation",
+   "feed_id": "electrek"
+  },
+  {
+   "id": 27,
+   "url": "https://reneweconomy.com.au/ratings-system-designed-to-restore-trust-in-wind-and-solar-developers-goes-live-with-first-batch-scoring-well/?utm_source=rss&utm_medium=rss&utm_campaign=ratings-system-designed-to-restore-trust-in-wind-and-solar-developers-goes-live-with-first-batch-scoring-well",
+   "title": "Ratings system designed to restore trust in wind and solar developers goes live, with first batch scoring well",
+   "description": "Online rating tool that ranks renewable energy developers and transmission companies against seven key criteria, including engagement and conduct, goes live.",
+   "published_at": "2026-10-29T04:07:44+00:00",
+   "category": "grid",
+   "feed_id": "reneweconomy"
+  },
+  {
+   "id": 28,
+   "url": "https://www.carbonbrief.org/analysis-chinas-clean-tech-exports-in-2026-to-avoid-as-much-co2-as-brazil-emits-in-a-year",
+   "title": "Analysis: China’s clean-tech exports in 2026 to avoid as much CO2 as Brazil emits in a year",
+   "description": "China’s exports in 2026 of clean-energy technologies, such as solar panels, batteries and electric vehicles, are on track to cut&#8230;",
+   "published_at": "2026-10-29T07:51:24+00:00",
+   "category": "storage",
+   "feed_id": "carbon-brief"
+  },
+  {
+   "id": 29,
+   "url": "https://www.utilitydive.com/news/firstenergy-data-center-pipeline-maidsville/873149/",
+   "title": "FirstEnergy data center pipeline increases 5% to 26 GW in Q3",
+   "description": "Two FirstEnergy utilities reserved combined cycle turbines for a 1.2-GW data center-focused project in West Virginia and issued a solicitation for an additional 3 GW, company officials said.",
+   "published_at": "2026-10-29T09:00:02-04:00",
+   "category": "generation",
+   "feed_id": "utility-dive"
+  },
+  {
+   "id": 30,
+   "url": "https://www.utilitydive.com/news/chinese-linked-solar-developer-loses-appeal-to-connect-to-texas-grid/873178/",
+   "title": "Chinese-linked solar developer loses appeal over Texas grid interconnection",
+   "description": "The U.S. Court of Appeals for the 5th Circuit&nbsp;said Texas has a &ldquo;free lane&rdquo; to enforce restrictions on foreign-owned companies&rsquo;&nbsp;access to the state&rsquo;s electric grid in a ruling that could have implications for other states and market participants.",
+   "published_at": "2026-10-29T09:21:29-04:00",
+   "category": "grid",
+   "feed_id": "utility-dive"
+  },
+  {
+   "id": 31,
+   "url": "https://www.pv-magazine.com/2026/10/29/scatec-secures-217-million-for-egypt-smelter-solar-plus-storage-plant/",
+   "title": "Scatec secures $217 million for Egypt smelter solar-plus-storage plant",
+   "description": "A solar and battery project in Egypt will supply state-owned Egypt Aluminium under a 25-year, sovereign-guaranteed power purchase agreement as the smelter seeks to meet trade-related environmental standards.",
+   "published_at": "2026-10-29T09:30:00+00:00",
+   "category": "storage",
+   "feed_id": "pv-magazine"
+  },
+  {
+   "id": 32,
+   "url": "https://www.pv-magazine.com/2026/10/29/spain-solar-ppa-prices-fall-to-e30-93-mwh-as-bess-gains-ground/",
+   "title": "Spain solar PPA prices fall to €30.93/MWh as BESS gains ground",
+   "description": "Average prices for standalone solar power purchase agreements (PPAs) in Spain fell 7.7% year on year to €30.93 ($34.46)/MWh in the third quarter of 2026, while hybrid solar-and-storage contracts reached €48/MWh. Rising development costs and renewable energy curtailment are increasing interest in battery storage. The post Spain solar PPA prices fall to €30.93/MWh as BESS gains ground appeared",
+   "published_at": "2026-10-29T10:15:00+00:00",
+   "category": "grid",
+   "feed_id": "pv-magazine"
+  },
+  {
+   "id": 33,
+   "url": "https://www.pv-magazine.com/2026/10/29/botswana-kicks-off-floating-solar-tender/",
+   "title": "Botswana kicks off floating solar tender",
+   "description": "A tender is open in Botswana for the development of floating PV systems on dams belonging to the country’s Water Utilities Corporation. The deadline for applications is November 19.",
+   "published_at": "2026-10-29T10:45:00+00:00",
+   "category": "generation",
+   "feed_id": "pv-magazine"
+  },
+  {
+   "id": 34,
+   "url": "https://www.utilitydive.com/news/aep-transmission-data-center-earnings/873189/",
+   "title": "AEP increases investment plan 30% to $100B on gen, transmission spending",
+   "description": "American Electric Power&rsquo;s contracted large loads jumped 22% to 84 GW, mainly on a 10.4-GW data center in Ohio being developed by SB Energy, company officials said Wednesday.",
+   "published_at": "2026-10-29T11:05:24-04:00",
+   "category": "grid",
+   "feed_id": "utility-dive"
+  },
+  {
+   "id": 35,
+   "url": "https://www.pv-magazine.com/2026/10/29/western-australia-moves-to-legalize-plug-in-solar-on-german-model/",
+   "title": "Western Australia moves to legalize plug-in solar on German model",
+   "description": "A draft technical standard out for consultation in Western Australia is based on Germany’s plug-in solar specification and would class balcony systems as ordinary electrical appliances.",
+   "published_at": "2026-10-29T11:15:00+00:00",
+   "category": "generation",
+   "feed_id": "pv-magazine"
+  },
+  {
+   "id": 36,
+   "url": "https://www.utilitydive.com/news/baaja-permitting-reform-interregional-transmission-harder/873041/",
+   "title": "BAAJA gives federal regulators ‘bigger hammer’ to break transmission blocks",
+   "description": "&ldquo;I think the cost-sharing elements are by far probably the most important part of this bill,&rdquo; Rep. Josh Harder, D-Calif., told Utility Dive.&nbsp;&ldquo;My hope is that can unlock a lot more collaboration as opposed to ... folks pointing the finger at each other.&rdquo;",
+   "published_at": "2026-10-29T11:21:25-04:00",
+   "category": "grid",
+   "feed_id": "utility-dive"
+  },
+  {
+   "id": 37,
+   "url": "https://www.pv-magazine.com/2026/10/29/ground-mounted-solar-used-2798-hectares-of-land-in-italy-in-2025/",
+   "title": "Ground-mounted solar used 2,798 hectares of land in Italy in 2025",
+   "description": "Ground-mounted photovoltaic (PV) installations accounted for 27% of Italy’s land consumption in 2025, according to the National System for Environmental Protection (SNPA).",
+   "published_at": "2026-10-29T12:00:00+00:00",
+   "category": "generation",
+   "feed_id": "pv-magazine"
+  },
+  {
+   "id": 38,
+   "url": "https://www.pv-magazine.com/2026/10/29/researchers-develop-molecular-locking-strategy-for-organic-solar-cells/",
+   "title": "Researchers develop molecular locking strategy for organic solar cells",
+   "description": "Small-area organic solar cells featuring the molecular locking strategy achieved a power conversion efficiency of 20.4%, while larger-area modules reached a record active-area efficiency of 18.8%.",
+   "published_at": "2026-10-29T13:00:00+00:00",
+   "category": "generation",
+   "feed_id": "pv-magazine"
+  },
+  {
+   "id": 39,
+   "url": "https://cleantechnica.com/2026/10/29/scaling-european-battery-recycling-via-the-circular-economy-act/",
+   "title": "Scaling European Battery Recycling via the Circular Economy Act",
+   "description": "Ahead of the Circular Economy Act, a joint letter from T&#38;E, Recharge, Clean Tech for Europe and EIES calls for concrete measures to support the effective scaling of Europe’s material recovery and recycling capacity. Recovering materials from end-of-life batteries is a key means to secure much needed critical minerals (CRMs) ... [continued] The post Scaling European Battery Recycling via",
+   "published_at": "2026-10-29T14:08:52+00:00",
+   "category": "storage",
+   "feed_id": "cleantechnica"
+  },
+  {
+   "id": 40,
+   "url": "https://electrek.co/2026/10/29/ford-escape-ev-uev-platform-update/",
+   "title": "The Ford Escape may return as an EV based on the UEV platform [Update]",
+   "description": "Ford pulled the plug on the Escape last year after a 25-year run, but the crossover SUV could return as an EV on the new UEV platform.",
+   "published_at": "2026-10-29T14:13:42+00:00",
+   "category": "transportation",
+   "feed_id": "electrek"
+  },
+  {
+   "id": 41,
+   "url": "https://cleantechnica.com/2026/10/29/battman-batteries-evs-energy-storage-us-trump/",
+   "title": "Sure Looks Like Trump Loves EVs After All",
+   "description": "Despite Trump's war on EVs, the US Department of Energy has launched the new \"BattMan\" battery innovation accelerator led by experts at the Pacific Northwest National Laboratory.",
+   "published_at": "2026-10-29T14:25:06+00:00",
+   "category": "storage",
+   "feed_id": "cleantechnica"
+  },
+  {
+   "id": 42,
+   "url": "https://www.pv-magazine.com/2026/10/29/us-customs-releases-toyos-ethiopian-cells-as-duty-probe-continues/",
+   "title": "US customs frees detained Ethiopian solar cells as duty probe continues",
+   "description": "US Customs and Border Protection (CBP) has released shipments of Toyo’s Ethiopian-made solar cells, while a separate US Department of Commerce inquiry into whether cells from Ethiopia circumvent duties on Chinese solar products continues.",
+   "published_at": "2026-10-29T14:26:03+00:00",
+   "category": "generation",
+   "feed_id": "pv-magazine"
+  },
+  {
+   "id": 43,
+   "url": "https://electrek.co/2026/10/29/15000-low-speed-ev-now-on-sale-street-legal/",
+   "title": "This $15,000 low-speed EV is now on sale, and it’s street-legal",
+   "description": "It may be small, but it’s already drawing a big response. The 2027 Fiat Topolino is now on sale in the US: a street-legal, low-speed EV that starts under $15,000.",
+   "published_at": "2026-10-29T15:34:03+00:00",
+   "category": "transportation",
+   "feed_id": "electrek"
+  },
+  {
+   "id": 44,
+   "url": "https://www.pv-magazine.com/2026/10/29/first-solar-opens-1-7-gw-module-plant-in-south-carolina/",
+   "title": "First Solar opens 1.7 GW module plant in South Carolina",
+   "description": "First Solar’s latest US plant will complete production of thin-film solar modules manufactured at overseas sites, with annual capacity set to increase from 1.7 GW to 3.4 GW by mid-2027.",
+   "published_at": "2026-10-29T16:30:00+00:00",
+   "category": "generation",
+   "feed_id": "pv-magazine"
+  },
+  {
+   "id": 45,
+   "url": "https://www.pv-magazine.com/2026/10/29/gallium-doped-zinc-oxide-enables-24-92-efficient-hjt-solar-cell/",
+   "title": "Gallium-doped zinc oxide enables 24.92%-efficient HJT solar cell",
+   "description": "Researchers have used room-temperature reactive plasma deposition to produce indium-free transparent electrodes for silicon heterojunction solar cells. Optimizing the oxygen content during deposition enabled a conversion efficiency of 24.92%, with silver-coated copper contacts.",
+   "published_at": "2026-10-29T16:45:00+00:00",
+   "category": "generation",
+   "feed_id": "pv-magazine"
+  },
+  {
+   "id": 46,
+   "url": "https://cleantechnica.com/2026/10/29/grid-flexibility-location-ireland-naas/",
+   "title": "Ireland’s Grid Flexibility Assessment Shows Why Location Matters",
+   "description": "Ireland's Naas substation shows why flexible batteries and loads must match the location, timing and operating conditions of grid constraints.",
+   "published_at": "2026-10-29T16:59:03+00:00",
+   "category": "storage",
+   "feed_id": "cleantechnica"
+  },
+  {
+   "id": 47,
+   "url": "https://www.pv-magazine.com/2026/10/29/government-backs-indian-floating-solar/",
+   "title": "Government backs Indian floating solar",
+   "description": "New policy support sees India’s federal government attempt to accelerate floating solar deployment, but can it be done, and in a country with ample ground-mounted potential, is it worth the effort?",
+   "published_at": "2026-10-29T17:00:00+00:00",
+   "category": "generation",
+   "feed_id": "pv-magazine"
+  },
+  {
+   "id": 48,
+   "url": "https://electrek.co/2026/10/29/hyundai-ioniq-p-name-new-entry-level-ev/",
+   "title": "Hyundai hints at IONIQ P as the name for its new entry-level EV",
+   "description": "Hyundai is launching a new mass-market electric SUV to be made in India, expected to go on sale as the IONIQ P.",
+   "published_at": "2026-10-29T17:08:23+00:00",
+   "category": "transportation",
+   "feed_id": "electrek"
+  },
+  {
+   "id": 49,
+   "url": "https://electrek.co/2026/10/29/toyotas-ev-sales-doubled-but-gas-cars-getting-crushed-china/",
+   "title": "Toyota’s EV sales more than doubled in a year, but gas cars are getting crushed in China",
+   "description": "Toyota’s EV sales have jumped 127% through September, but that isn’t telling the whole story. Slumping demand for gas and hybrid cars in China has pushed global sales lower for three months in a row.",
+   "published_at": "2026-10-29T20:02:40+00:00",
+   "category": "transportation",
+   "feed_id": "electrek"
+  },
+  {
+   "id": 50,
+   "url": "https://electrek.co/2026/10/29/rivian-electric-van-awd-30-percent-more-range/",
+   "title": "Rivian’s electric van gets 30% more range and AWD, now delivering",
+   "description": "Rivian has started delivering the first major hardware upgrade to its electric van since production began in 2021: a bigger LFP battery pack good for 30% more range, and a new dual-motor AWD version. The company confirmed in its Q3 2026 shareholder presentation that deliveries of the new variants began in early October. That’s the first real spec bump for a van that has been stuck at abou",
+   "published_at": "2026-10-29T20:04:01+00:00",
+   "category": "storage",
+   "feed_id": "electrek"
+  }
+ ]
+}

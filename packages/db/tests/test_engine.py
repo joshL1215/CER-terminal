@@ -1,14 +1,13 @@
 import pytest
 from sqlalchemy import select
 
-from app.db import (
+from cer_db import (
     DatabaseConfigError,
     FeedRecord,
     database_url_from_env,
+    make_session_factory,
     session_scope,
-    sync_feeds,
 )
-from app.db.engine import make_session_factory
 
 
 @pytest.mark.parametrize(
@@ -31,16 +30,28 @@ def test_database_url_missing(monkeypatch):
         database_url_from_env()
 
 
-def test_session_scope_commits_and_rolls_back(engine, registry):
+def make_feed(feed_id: str) -> FeedRecord:
+    return FeedRecord(
+        id=feed_id,
+        name=feed_id.title(),
+        url=f"https://{feed_id}.example.com/rss",
+        source_type="news",
+        category="general",
+        tags=[],
+    )
+
+
+def test_session_scope_commits_and_rolls_back(engine):
     factory = make_session_factory(engine)
 
     with pytest.raises(RuntimeError), session_scope(factory) as session:
-        sync_feeds(session, registry)
+        session.add(make_feed("alpha"))
+        session.flush()
         raise RuntimeError("boom")
     with factory() as session:
         assert session.scalars(select(FeedRecord)).all() == []
 
     with session_scope(factory) as session:
-        sync_feeds(session, registry)
+        session.add_all([make_feed("alpha"), make_feed("beta")])
     with factory() as session:
         assert len(session.scalars(select(FeedRecord)).all()) == 2

@@ -4,12 +4,12 @@ from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
 
+from cer_db import Article, ArticleStatus
 from sqlalchemy import func, select, update
 from sqlalchemy.orm import Session
 
 from app.urls import url_hash
 
-from ..models import Article, ArticleStatus
 from ._upsert import upsert_insert
 
 

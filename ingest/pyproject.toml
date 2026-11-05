@@ -5,8 +5,7 @@ description = "Daily RSS ingest and LLM relevance filtering for the UCSD Center 
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "alembic>=1.13",
-    "psycopg[binary]>=3.2",
+    "cer-db",
     "pydantic>=2.7",
     "pyyaml>=6.0",
     "sqlalchemy>=2.0",
@@ -34,3 +33,6 @@ target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
+
+[tool.uv.sources]
+cer-db = { path = "../packages/db", editable = true }

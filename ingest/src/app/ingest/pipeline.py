@@ -72,7 +72,7 @@ def run_ingest(
     providers: list[Provider],
     chat_client: ChatClient,
     classify: bool = True,
-    batch_size: int = 40,
+    batch_size: int = 20,
     max_batches: int = 25,
     transport: httpx.AsyncBaseTransport | None = None,
 ) -> IngestSummary:

@@ -1,8 +1,8 @@
 # Literal words/phrases, matched without regard to case or punctuation.
 # Add plural forms and synonyms explicitly; this filter does not infer meaning.
-# Any topic match in the title or description -> needs_review.
-# No topic matches -> irrelevant, even when exclusions are empty.
-# Exclusion matches are reported but do not override topic matches.
+# Any topic match in the title or description -> relevant (bypass AI relevance review).
+# No topic matches -> needs_review (send to AI relevance filtering).
+# Exclusion matches are reported as evidence only and do not change routing.
 version: 1
 
 topics:

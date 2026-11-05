@@ -38,10 +38,10 @@ def test_bundled_filter_rules_are_valid():
 def test_exclusions_can_be_omitted_or_empty(exclusions):
     rules = parse_filter_rules(f"version: 1\ntopics: {{evs: [electric vehicle]}}\n{exclusions}")
     result = filter_article("Electric vehicle review: a new test drive", None, rules)
-    assert result.decision is RuleDecision.NEEDS_REVIEW
+    assert result.decision is RuleDecision.RELEVANT
     assert result.matched_exclusions == ()
     result = filter_article("Best phone accessories this holiday season", None, rules)
-    assert result.decision is RuleDecision.IRRELEVANT
+    assert result.decision is RuleDecision.NEEDS_REVIEW
 
 
 @pytest.mark.parametrize(
@@ -49,22 +49,22 @@ def test_exclusions_can_be_omitted_or_empty(exclusions):
     [
         (
             "Coal consumption falls as solar generation increases",
-            RuleDecision.NEEDS_REVIEW,
+            RuleDecision.RELEVANT,
             ("coal", "renewables"),
         ),
         (
             "Best phone accessories this holiday season",
-            RuleDecision.IRRELEVANT,
+            RuleDecision.NEEDS_REVIEW,
             (),
         ),
         (
             "Government announces new industrial policy",
-            RuleDecision.IRRELEVANT,
+            RuleDecision.NEEDS_REVIEW,
             (),
         ),
         (
             "Electric vehicle review: a new test drive",
-            RuleDecision.NEEDS_REVIEW,
+            RuleDecision.RELEVANT,
             ("evs",),
         ),
     ],
@@ -78,22 +78,22 @@ def test_sample_articles(rules, title, decision, topics):
 
 def test_description_can_supply_the_topic(rules):
     result = filter_article("New infrastructure investment", "Expands battery storage.", rules)
-    assert result.decision is RuleDecision.NEEDS_REVIEW
+    assert result.decision is RuleDecision.RELEVANT
     assert result.topics == ("grid",)
     assert result.matched_keywords == ("battery storage",)
 
 
-def test_conflicts_across_fields_preserve_both_kinds_of_evidence(rules):
+def test_exclusions_are_reported_without_overriding_topic_matches(rules):
     result = filter_article("Solar generation expands", "Includes a discount code.", rules)
-    assert result.decision is RuleDecision.NEEDS_REVIEW
+    assert result.decision is RuleDecision.RELEVANT
     assert result.matched_keywords == ("solar",)
     assert result.matched_exclusions == ("discount code",)
 
 
 @pytest.mark.parametrize("title", ["Soil quality improves", "Dev tools and medieval art", ""])
-def test_substrings_and_empty_text_do_not_pass_the_filter(rules, title):
+def test_substrings_and_empty_text_need_review(rules, title):
     result = filter_article(title, None, rules)
-    assert result.decision is RuleDecision.IRRELEVANT
+    assert result.decision is RuleDecision.NEEDS_REVIEW
     assert result.matched_keywords == ()
 
 
@@ -103,14 +103,14 @@ def test_case_html_entities_hyphens_and_whitespace(rules):
         "<p>NATURAL&nbsp;<b>GAS</b> and wind-\nenergy</p>",
         rules,
     )
-    assert result.decision is RuleDecision.NEEDS_REVIEW
+    assert result.decision is RuleDecision.RELEVANT
     assert result.topics == ("gas", "renewables")
     assert result.matched_keywords == ("natural gas", "solar", "wind energy")
 
 
 def test_phrases_do_not_span_title_and_description(rules):
     result = filter_article("Natural", "Gas", rules)
-    assert result.decision is RuleDecision.IRRELEVANT
+    assert result.decision is RuleDecision.NEEDS_REVIEW
 
 
 def test_repeated_keywords_are_reported_once(rules):
@@ -132,11 +132,13 @@ exclusions: [buy now]
 """
     )
     result = filter_article("Heat-pump adoption grows", None, rules)
-    assert result.decision is RuleDecision.NEEDS_REVIEW
+    assert result.decision is RuleDecision.RELEVANT
     assert result.topics == ("heat", "buildings")
     assert result.matched_keywords == ("heat pump",)
-    assert filter_article("Solar adoption grows", None, rules).decision is RuleDecision.IRRELEVANT
-    assert filter_article("Buy now!", None, rules).decision is RuleDecision.IRRELEVANT
+    assert filter_article("Solar adoption grows", None, rules).decision is RuleDecision.NEEDS_REVIEW
+    result = filter_article("Buy now!", None, rules)
+    assert result.decision is RuleDecision.NEEDS_REVIEW
+    assert result.matched_exclusions == ("buy now",)
 
 
 @pytest.mark.parametrize(

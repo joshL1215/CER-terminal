@@ -103,7 +103,6 @@ def load_filter_rules(path: str | Path = DEFAULT_RULES_PATH) -> FilterRules:
 
 
 class RuleDecision(StrEnum):
-    RELEVANT = "relevant"
     IRRELEVANT = "irrelevant"
     NEEDS_REVIEW = "needs_review"
 
@@ -138,9 +137,9 @@ def _article_words(value: str) -> str:
 def filter_article(title: str, description: str | None, rules: FilterRules) -> RuleResult:
     """Match whole words/phrases in either field, ignoring case, HTML, and punctuation.
 
-    Topic matches alone are relevant; exclusions alone are irrelevant. Conflicting
-    evidence or no evidence needs review. Relevance is a topical hint, not a
-    verified research conclusion or an instruction to publish the article.
+    At least one topic keyword in the title or description is required for human
+    or AI review; articles without topic matches are irrelevant to this filter.
+    Matching keywords does not verify research relevance or approve publication.
     """
     fields = (_article_words(title), _article_words(description or ""))
 
@@ -160,14 +159,14 @@ def filter_article(title: str, description: str | None, rules: FilterRules) -> R
         decision = RuleDecision.NEEDS_REVIEW
         reason = "Both topic keywords and exclusions matched; review conflicting evidence."
     elif topics:
-        decision = RuleDecision.RELEVANT
-        reason = "Topic keywords matched with no exclusions."
+        decision = RuleDecision.NEEDS_REVIEW
+        reason = "Topic keywords matched; review is needed to confirm research relevance."
     elif exclusions:
         decision = RuleDecision.IRRELEVANT
         reason = "Exclusions matched with no topic keywords."
     else:
-        decision = RuleDecision.NEEDS_REVIEW
-        reason = "No configured keywords matched; relevance is unknown."
+        decision = RuleDecision.IRRELEVANT
+        reason = "No topic keywords matched in the title or description."
 
     return RuleResult(
         decision=decision,

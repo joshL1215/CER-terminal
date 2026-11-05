@@ -54,25 +54,29 @@ result = filter_article(
     description=None,
     rules=rules,
 )
-print(result.decision.value)  # relevant
+print(result.decision.value)  # needs_review
 print(result.topics)          # ('coal', 'renewables')
 print(result.matched_keywords)  # ('coal', 'solar')
 ```
 
-Configure literal keywords under `topics` and unwanted phrases under `exclusions`. Matching ignores
+Configure literal keywords under `topics` and optional unwanted phrases under `exclusions`.
+Exclusion matches are reported as evidence but do not override topic matches. Matching ignores
 case, HTML markup, whitespace, and punctuation, and uses whole words/phrases (`oil` does not match
 `soil`). Add plurals and synonyms explicitly. Phrases must occur within the title or description,
 not across both fields. Invalid rules and duplicate YAML keys raise `FilterConfigError`.
 
 | Matches | Decision |
 | --- | --- |
-| Topic keywords only | `relevant` |
+| Topic keywords only | `needs_review` |
 | Exclusions only | `irrelevant` |
-| Both, or neither | `needs_review` |
+| Both topic keywords and exclusions | `needs_review` |
+| Neither | `irrelevant` |
 
-Results include matched topics, keywords, exclusions, and an explanation. These are heuristic topic
-hints, not verified research conclusions. Keep uncertain articles for later human or LLM review;
-this filter is not yet wired into an ingestion pipeline.
+Results include matched topics, keywords, exclusions, and an explanation. Topic matches still need
+human or LLM review to confirm research relevance. Articles without a topic keyword in either the
+title or description are marked `irrelevant` and can skip AI review, even with `exclusions: []`.
+This can miss useful articles with different wording, so maintain synonyms and plurals in the rules.
+This filter is not yet wired into an ingestion pipeline.
 
 Run its sample-based tests locally:
 

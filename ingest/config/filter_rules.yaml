@@ -1,7 +1,8 @@
 # Literal words/phrases, matched without regard to case or punctuation.
 # Add plural forms and synonyms explicitly; this filter does not infer meaning.
-# Topic + exclusion matches -> needs_review, rather than automatic rejection.
-# No matches -> needs_review, so unfamiliar topics are not silently discarded.
+# Any topic match in the title or description -> needs_review.
+# No topic matches -> irrelevant, even when exclusions are empty.
+# Exclusion matches are reported but do not override topic matches.
 version: 1
 
 topics:

@@ -29,7 +29,7 @@ def upgrade() -> None:
         sa.Column("source_type", sa.String(length=32), nullable=False),
         sa.Column("category", sa.String(length=64), nullable=False),
         sa.Column("tags", sa.JSON(), nullable=False),
-        sa.Column("active", sa.Boolean(), server_default=sa.text("true"), nullable=False),
+        sa.Column("active", sa.Boolean(), server_default=sa.true(), nullable=False),
         sa.Column("llm_context", sa.Text(), nullable=True),
         sa.Column("etag", sa.Text(), nullable=True),
         sa.Column("last_modified", sa.Text(), nullable=True),
@@ -40,13 +40,13 @@ def upgrade() -> None:
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),
-            server_default=sa.text("now()"),
+            server_default=sa.func.now(),
             nullable=False,
         ),
         sa.Column(
             "updated_at",
             sa.DateTime(timezone=True),
-            server_default=sa.text("now()"),
+            server_default=sa.func.now(),
             nullable=False,
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_feeds")),
@@ -68,7 +68,7 @@ def upgrade() -> None:
         sa.Column(
             "fetched_at",
             sa.DateTime(timezone=True),
-            server_default=sa.text("now()"),
+            server_default=sa.func.now(),
             nullable=False,
         ),
         sa.Column(

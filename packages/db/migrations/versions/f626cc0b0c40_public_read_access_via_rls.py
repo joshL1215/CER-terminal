@@ -1,11 +1,12 @@
 """public read access via rls
 
-Lets the frontend read kept articles and active feeds through the Supabase
-Data API as the `anon`/`authenticated` roles, and nothing else. Services that
-connect as the table owner (postgres) bypass RLS and are unaffected.
+Lets the frontend read kept articles (from active feeds) and active feeds
+through the Supabase Data API as the `anon`/`authenticated` roles, limited to
+public columns, and nothing else. Services connecting as the table owner
+(postgres) bypass RLS and are unaffected.
 
-Postgres only. Grants and policies are skipped where the Supabase roles don't
-exist (plain Postgres, e.g. local or test databases); RLS is still enabled.
+Postgres only; no-op on SQLite. All checks run in SQL so `alembic upgrade --sql`
+works.
 
 Revision ID: f626cc0b0c40
 Revises: 41253d736576
@@ -22,38 +23,59 @@ down_revision: str | Sequence[str] | None = "41253d736576"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
-TABLES = ("articles", "feeds")
 PUBLIC_ROLES = "anon, authenticated"
+TABLES = ("articles", "feeds", "alembic_version")
+PUBLIC_COLUMNS = {
+    "articles": "id, url, title, description, published_at, category, feed_id",
+    "feeds": "id, name, url, category, tags",
+}
+OBJECT_KINDS = ("tables", "sequences", "functions")
 
 
 def _is_postgres() -> bool:
-    return op.get_bind().dialect.name == "postgresql"
-
-
-def _supabase_roles_exist() -> bool:
-    count = op.get_bind().exec_driver_sql(
-        "select count(*) from pg_roles where rolname in ('anon', 'authenticated')"
-    )
-    return count.scalar() == 2
+    return op.get_context().dialect.name == "postgresql"
 
 
 def upgrade() -> None:
     if not _is_postgres():
         return
 
-    for table in TABLES:
-        op.execute(f"alter table public.{table} enable row level security")
+    # Supabase already has these roles. Creating them elsewhere means a database
+    # migrated before they exist still ends up with the grants and policies.
+    op.execute(
+        """
+        do $$
+        begin
+          if not exists (select 1 from pg_roles where rolname = 'anon') then
+            create role anon nologin;
+          end if;
+          if not exists (select 1 from pg_roles where rolname = 'authenticated') then
+            create role authenticated nologin;
+          end if;
+        end
+        $$
+        """
+    )
 
-    if not _supabase_roles_exist():
-        return
-
+    # Supabase grants everything in `public` to these roles by default; start from nothing.
+    for kind in OBJECT_KINDS:
+        op.execute(
+            f"alter default privileges in schema public revoke all on {kind} from {PUBLIC_ROLES}"
+        )
     for table in TABLES:
         op.execute(f"revoke all on public.{table} from {PUBLIC_ROLES}")
-        op.execute(f"grant select on public.{table} to {PUBLIC_ROLES}")
+        op.execute(f"alter table public.{table} enable row level security")
+    op.execute(f"revoke all on all sequences in schema public from {PUBLIC_ROLES}")
+
+    for table, columns in PUBLIC_COLUMNS.items():
+        op.execute(f"grant select ({columns}) on public.{table} to {PUBLIC_ROLES}")
 
     op.execute(
-        f"create policy public_read_kept_articles on public.articles "
-        f"for select to {PUBLIC_ROLES} using (status = 'kept')"
+        f"""
+        create policy public_read_kept_articles on public.articles
+        for select to {PUBLIC_ROLES}
+        using (status = 'kept' and exists (select 1 from public.feeds f where f.id = feed_id))
+        """
     )
     op.execute(
         f"create policy public_read_active_feeds on public.feeds "
@@ -62,15 +84,13 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
+    # Leaves the roles and the revoked default privileges in place, so the public
+    # roles end up with no access rather than Supabase's original grants.
     if not _is_postgres():
         return
 
     op.execute("drop policy if exists public_read_kept_articles on public.articles")
     op.execute("drop policy if exists public_read_active_feeds on public.feeds")
-
-    if _supabase_roles_exist():
-        for table in TABLES:
-            op.execute(f"revoke select on public.{table} from {PUBLIC_ROLES}")
-
     for table in TABLES:
+        op.execute(f"revoke all on public.{table} from {PUBLIC_ROLES}")
         op.execute(f"alter table public.{table} disable row level security")

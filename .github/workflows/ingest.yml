@@ -1,0 +1,51 @@
+name: Daily ingest
+
+on:
+  schedule:
+    - cron: "17 11 * * *" # 11:17 UTC daily (off the hour, when GitHub is less busy)
+  workflow_dispatch:
+    inputs:
+      skip_classify:
+        description: Fetch only, no LLM calls
+        type: boolean
+        default: false
+
+concurrency:
+  group: ingest
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      LLM_BASE_URL: ${{ vars.LLM_BASE_URL }}
+      LLM_MODEL: ${{ vars.LLM_MODEL }}
+      LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+      LLM_JSON_MODE: ${{ vars.LLM_JSON_MODE }}
+      LLM_FALLBACK_BASE_URL: ${{ vars.LLM_FALLBACK_BASE_URL }}
+      LLM_FALLBACK_MODEL: ${{ vars.LLM_FALLBACK_MODEL }}
+      LLM_FALLBACK_API_KEY: ${{ secrets.LLM_FALLBACK_API_KEY }}
+      LLM_FALLBACK_JSON_MODE: ${{ vars.LLM_FALLBACK_JSON_MODE }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+
+      - name: Apply database migrations
+        working-directory: packages/db
+        run: |
+          uv sync --locked
+          uv run alembic upgrade head
+
+      - name: Install ingest
+        working-directory: ingest
+        run: uv sync --locked
+
+      - name: Run ingest
+        working-directory: ingest
+        run: uv run python -m app.ingest ${{ inputs.skip_classify && '--skip-classify' || '' }}

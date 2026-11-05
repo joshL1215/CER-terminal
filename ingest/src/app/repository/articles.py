@@ -1,6 +1,6 @@
 """Article queries: storing new items and recording relevance decisions."""
 
-from collections.abc import Iterable, Sequence
+from collections.abc import Collection, Iterable, Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
 
@@ -65,14 +65,14 @@ def insert_new_articles(session: Session, items: Iterable[NewArticle]) -> int:
     return len(session.execute(stmt).all())
 
 
-def get_pending_articles(session: Session, *, limit: int = 50) -> Sequence[Article]:
+def get_pending_articles(
+    session: Session, *, limit: int = 50, exclude_ids: Collection[int] = ()
+) -> Sequence[Article]:
     """Oldest articles still waiting for a relevance decision."""
-    return session.scalars(
-        select(Article)
-        .where(Article.status == ArticleStatus.PENDING)
-        .order_by(Article.fetched_at, Article.id)
-        .limit(limit)
-    ).all()
+    query = select(Article).where(Article.status == ArticleStatus.PENDING)
+    if exclude_ids:
+        query = query.where(Article.id.not_in(list(exclude_ids)))
+    return session.scalars(query.order_by(Article.fetched_at, Article.id).limit(limit)).all()
 
 
 def count_pending_articles(session: Session) -> int:
@@ -105,17 +105,20 @@ def record_classifications(
 
 def record_classification_failure(
     session: Session, article_ids: Iterable[int], *, max_attempts: int = 3
-) -> None:
-    """Count a failed LLM attempt; articles that hit max_attempts become FAILED."""
+) -> int:
+    """Count a failed LLM attempt; articles that hit max_attempts become FAILED.
+
+    Returns how many articles were moved to FAILED by this call.
+    """
     ids = list(article_ids)
     if not ids:
-        return
+        return 0
     session.execute(
         update(Article)
         .where(Article.id.in_(ids), Article.status == ArticleStatus.PENDING)
         .values(classification_attempts=Article.classification_attempts + 1)
     )
-    session.execute(
+    result = session.execute(
         update(Article)
         .where(
             Article.id.in_(ids),
@@ -124,3 +127,4 @@ def record_classification_failure(
         )
         .values(status=ArticleStatus.FAILED)
     )
+    return result.rowcount

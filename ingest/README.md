@@ -12,6 +12,47 @@ uv sync
 uv run pytest
 ```
 
+## Running the ingest
+
+One run syncs `feeds.yaml` into the database, fetches every active feed, stores new articles, and
+asks the LLM to classify pending ones. GitHub Actions runs it daily
+([`.github/workflows/ingest.yml`](../.github/workflows/ingest.yml)); to run it locally:
+
+```sh
+export DATABASE_URL=postgresql://...       # tables must exist: run migrations in packages/db
+uv run python -m app.ingest                # full run
+uv run python -m app.ingest --skip-classify  # fetch only, no LLM calls
+uv run python -m app.ingest --help         # --batch-size, --max-batches, --feeds, --rules
+```
+
+Exit code 0 means the run completed (individual feeds may still have failed; see the log),
+1 is a database error, and 2 is a config error.
+
+### LLM configuration
+
+Any OpenAI-compatible chat API works (Groq, Gemini, OpenRouter, Mistral, OpenAI, Ollama, ...).
+Switching hosts is just a change of environment variables:
+
+| Variable | Meaning |
+| --- | --- |
+| `LLM_BASE_URL`, `LLM_MODEL`, `LLM_API_KEY` | Primary endpoint. If none are set, classification is skipped |
+| `LLM_FALLBACK_BASE_URL`, `LLM_FALLBACK_MODEL`, `LLM_FALLBACK_API_KEY` | Optional; tried when the primary fails |
+| `LLM_JSON_MODE`, `LLM_FALLBACK_JSON_MODE` | Set to `false` if the host rejects `response_format` |
+
+For example, Groq is `LLM_BASE_URL=https://api.groq.com/openai/v1` with `LLM_MODEL=openai/gpt-oss-120b`.
+In GitHub, put the API keys in repository **secrets** and the URLs and models in repository
+**variables** (Settings → Secrets and variables → Actions).
+
+Rate limits and outages are retried with backoff, then the fallback is tried. Articles the LLM
+didn't answer stay `pending` for the next run and become `failed` after 3 attempts.
+
+### Relevance rules
+
+[`config/rules.yaml`](config/rules.yaml) holds what the LLM is told to keep and reject, the allowed
+categories, and `keyword_reject` phrases that reject a title without calling the LLM. The current
+rules are a **placeholder** until they're agreed with CER. Bump `version` whenever they change: it
+is stored with every decision.
+
 ## Feed registry
 
 RSS feeds live in [`config/feeds.yaml`](config/feeds.yaml). Each feed has an `id`, `name`, `url`,

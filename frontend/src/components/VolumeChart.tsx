@@ -1,6 +1,7 @@
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 import { CATEGORIES, OTHER, type WeekVolume } from "../model/analysis";
+import { useReducedMotion } from "../useReducedMotion";
 import { ChartCard } from "./ChartCard";
 import { ChartTooltip } from "./ChartTooltip";
 
@@ -11,6 +12,7 @@ export function categoryColor(category: string): string {
 }
 
 export function VolumeChart({ volume, categories, dim }: { volume: WeekVolume[]; categories: string[]; dim?: boolean }) {
+  const reducedMotion = useReducedMotion();
   const data = volume.map((w) => ({ label: w.label, ...w.counts, total: w.total }));
   const columns = [
     { key: "label", label: "Week of" },
@@ -52,7 +54,8 @@ export function VolumeChart({ volume, categories, dim }: { volume: WeekVolume[];
               strokeWidth={1}
               maxBarSize={24}
               radius={i === categories.length - 1 ? [4, 4, 0, 0] : 0}
-              isAnimationActive={false}
+              isAnimationActive={!reducedMotion}
+              animationDuration={650}
             />
           ))}
         </BarChart>

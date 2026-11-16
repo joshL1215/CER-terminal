@@ -18,6 +18,7 @@ import {
 import type { Consensus } from "../model/consensus";
 import { FOSSIL_HISTORY } from "../model/history";
 import type { TimelinePoint } from "../model/timeline";
+import { useReducedMotion } from "../useReducedMotion";
 import { ChartCard } from "./ChartCard";
 import { ChartTooltip } from "./ChartTooltip";
 
@@ -30,11 +31,12 @@ const fmt0 = (n: number) => n.toFixed(0);
 const fmt1 = (n: number) => n.toFixed(1);
 
 export function HistoryChart({ consensus, dim }: { consensus: Consensus; dim?: boolean }) {
+  const reducedMotion = useReducedMotion();
   const data = FOSSIL_HISTORY.map((p) => ({ year: p.year, twh: p.twh / 1000 }));
   return (
     <ChartCard
-      title="Global fossil fuel consumption and the consensus peak"
-      subtitle={`1900–2024 actuals (thousand TWh/yr); shaded p10–p90 window ${fmt0(consensus.p10)}–${fmt0(consensus.p90)}, median ${fmt0(consensus.median)}`}
+      title="The long view of fossil energy"
+      subtitle={`Historical consumption · thousand TWh per year. Shading marks the central 80% peak-timing range (${fmt0(consensus.p10)}–${fmt0(consensus.p90)}).`}
       dim={dim}
       columns={[
         { key: "year", label: "Year" },
@@ -44,6 +46,7 @@ export function HistoryChart({ consensus, dim }: { consensus: Consensus; dim?: b
     >
       <ResponsiveContainer width="100%" height={300}>
         <AreaChart data={data} margin={{ top: 16, right: 24, bottom: 4, left: 0 }}>
+          <defs><linearGradient id="history-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="var(--series-1)" stopOpacity={0.24} /><stop offset="100%" stopColor="var(--series-1)" stopOpacity={0.015} /></linearGradient></defs>
           <CartesianGrid {...GRID} />
           <XAxis
             dataKey="year"
@@ -81,11 +84,12 @@ export function HistoryChart({ consensus, dim }: { consensus: Consensus; dim?: b
             name="Fossil energy"
             stroke="var(--series-1)"
             strokeWidth={2}
-            fill="var(--series-1)"
-            fillOpacity={0.1}
+            fill="url(#history-fill)"
+            fillOpacity={1}
             dot={false}
             activeDot={{ r: 4, strokeWidth: 2, stroke: "var(--surface-1)" }}
-            isAnimationActive={false}
+            isAnimationActive={!reducedMotion}
+            animationDuration={650}
           />
         </AreaChart>
       </ResponsiveContainer>
@@ -94,11 +98,12 @@ export function HistoryChart({ consensus, dim }: { consensus: Consensus; dim?: b
 }
 
 export function DistributionChart({ consensus, dim }: { consensus: Consensus; dim?: boolean }) {
+  const reducedMotion = useReducedMotion();
   const data = consensus.histogram;
   return (
     <ChartCard
       title="Where the peak year lands"
-      subtitle={`Probability by year from ${consensus.draws.toLocaleString()} weighted draws · P(≤2030) ${(consensus.pBy2030 * 100).toFixed(0)}%`}
+      subtitle={`A spread of possible peak years, rather than a single deadline. ${consensus.draws.toLocaleString()} weighted model draws.`}
       dim={dim}
       columns={[
         { key: "year", label: "Year" },
@@ -109,7 +114,7 @@ export function DistributionChart({ consensus, dim }: { consensus: Consensus; di
       <ResponsiveContainer width="100%" height={240}>
         <BarChart data={data} margin={{ top: 12, right: 12, bottom: 4, left: 0 }} barCategoryGap={2}>
           <CartesianGrid {...GRID} />
-          <XAxis dataKey="year" ticks={[2020, 2030, 2040, 2050, 2060]} {...AXIS} />
+          <XAxis dataKey="year" type="number" domain={[2020, 2060]} ticks={[2020, 2030, 2040, 2050, 2060]} {...AXIS} />
           <YAxis {...AXIS} width={40} tickFormatter={(v: number) => `${(v * 100).toFixed(0)}%`} />
           <Tooltip
             cursor={CURSOR_FILL}
@@ -122,7 +127,8 @@ export function DistributionChart({ consensus, dim }: { consensus: Consensus; di
             fill="var(--series-1)"
             maxBarSize={24}
             radius={[4, 4, 0, 0]}
-            isAnimationActive={false}
+            isAnimationActive={!reducedMotion}
+            animationDuration={650}
           />
         </BarChart>
       </ResponsiveContainer>
@@ -131,6 +137,7 @@ export function DistributionChart({ consensus, dim }: { consensus: Consensus; di
 }
 
 export function TimelineChart({ points, dim }: { points: TimelinePoint[]; dim?: boolean }) {
+  const reducedMotion = useReducedMotion();
   const last = points.length - 1;
   // Direct-label only the endpoint of each line; the legend + tooltip carry the rest.
   const endLabel = (props: { x?: number; y?: number; index?: number; value?: number }) =>
@@ -144,7 +151,7 @@ export function TimelineChart({ points, dim }: { points: TimelinePoint[]; dim?: 
   return (
     <ChartCard
       title="Consensus over time"
-      subtitle="Median peak year each week as kept articles accumulated (registry only vs. with the media nowcast)"
+      subtitle="Reconstructed weekly median using a fixed registry, compared with the effect of accumulating news."
       dim={dim}
       columns={[
         { key: "label", label: "Week of" },
@@ -178,17 +185,19 @@ export function TimelineChart({ points, dim }: { points: TimelinePoint[]; dim?: 
             strokeWidth={2}
             dot={{ r: 4, strokeWidth: 2, stroke: "var(--surface-1)", fill: "var(--series-1)" }}
             activeDot={{ r: 5, strokeWidth: 2, stroke: "var(--surface-1)" }}
-            isAnimationActive={false}
+            isAnimationActive={!reducedMotion}
+            animationDuration={650}
           />
           <Line
             dataKey="withNowcast"
-            name="With media nowcast"
+            name="Including news"
             stroke="var(--series-2)"
             strokeWidth={2}
             dot={{ r: 4, strokeWidth: 2, stroke: "var(--surface-1)", fill: "var(--series-2)" }}
             activeDot={{ r: 5, strokeWidth: 2, stroke: "var(--surface-1)" }}
             label={endLabel}
-            isAnimationActive={false}
+            isAnimationActive={!reducedMotion}
+            animationDuration={650}
           />
         </LineChart>
       </ResponsiveContainer>

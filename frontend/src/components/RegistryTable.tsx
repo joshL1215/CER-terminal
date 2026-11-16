@@ -3,7 +3,7 @@ import type { Forecast } from "../model/registry";
 export function RegistryTable({ registry }: { registry: Forecast[] }) {
   const rows = [...registry].sort((a, b) => a.peakYear - b.peakYear);
   return (
-    <details className="registry">
+    <details className="registry card" open>
       <summary>Major-source registry ({rows.length} positions after dedupe)</summary>
       <div className="table-wrap">
         <table className="data">

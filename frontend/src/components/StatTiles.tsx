@@ -1,44 +1,64 @@
 import type { Analysis } from "../model/analysis";
-import { NOWCAST_MAX_WEIGHT } from "../model/nowcast";
+import type { Consensus } from "../model/consensus";
+import { Icon } from "./Icon";
 
-export function StatTiles({ analysis }: { analysis: Analysis }) {
-  const { withNowcast, registryOnly, nowcast, articles, registry } = analysis;
-  const shift = withNowcast.median - registryOnly.median;
-  const baseline = registry.filter((r) => r.scenario === "baseline").length;
+export function StatTiles({ analysis, consensus, onNews, onSources }: { analysis: Analysis; consensus: Consensus; onNews: (signals?: boolean) => void; onSources: () => void }) {
+  const { articles, registry, claimIds } = analysis;
+  const sources = registry.filter((r) => r.scenario === "baseline").length;
   return (
     <div className="tiles">
-      <div className="tile hero">
-        <div className="label">Consensus peak year</div>
-        <div className="value">{withNowcast.median.toFixed(0)}</div>
-        <div className="delta">
-          p10–p90 {withNowcast.p10.toFixed(0)}–{withNowcast.p90.toFixed(0)}
-          {nowcast ? ` · news shifts it ${shift >= 0 ? "+" : ""}${shift.toFixed(1)} yr` : " · registry only"}
+      <div className="tile">
+        <div className="tile-top">
+          <span className="label">Peak by 2030</span>
+          <span className="mini-icon">
+            <Icon name="overview" size={16} />
+          </span>
+        </div>
+        <div className="value">
+          {(consensus.pBy2030 * 100).toFixed(0)}
+          <span>%</span>
+        </div>
+        <div className="delta">Probability in the selected model</div>
+        <div className="probability-track">
+          <span style={{ width: `${consensus.pBy2030 * 100}%` }} />
         </div>
       </div>
-      <div className="tile">
-        <div className="label">Chance the peak is by 2030</div>
-        <div className="value">{(withNowcast.pBy2030 * 100).toFixed(0)}%</div>
-        <div className="delta">already peaked: {(withNowcast.pAlreadyPeaked * 100).toFixed(0)}%</div>
-      </div>
-      <div className="tile">
-        <div className="label">Major sources blended</div>
-        <div className="value">{baseline}</div>
-        <div className="delta">baseline scenarios, newest edition per org</div>
-      </div>
-      <div className="tile">
-        <div className="label">Articles in view</div>
-        <div className="value">{articles.length}</div>
-        <div className="delta">kept by the LLM screen</div>
-      </div>
-      <div className="tile">
-        <div className="label">Peak claims in the news</div>
-        <div className="value">{nowcast?.claims.length ?? 0}</div>
-        <div className="delta">
-          {nowcast
-            ? `nowcast weight ${nowcast.weight.toFixed(2)} of max ${NOWCAST_MAX_WEIGHT}`
-            : "no directional claims in view"}
+      <button className="tile tile-action" onClick={onSources}>
+        <div className="tile-top">
+          <span className="label">Outlook sources</span>
+          <span className="mini-icon">
+            <Icon name="sources" size={16} />
+          </span>
         </div>
-      </div>
+        <div className="value">
+          {sources}
+        </div>
+        <div className="delta">Baseline positions in the blend <Icon name="arrow" size={14} /></div>
+      </button>
+      <button className="tile tile-action" onClick={() => onNews(false)}>
+        <div className="tile-top">
+          <span className="label">Screened articles</span>
+          <span className="mini-icon">
+            <Icon name="news" size={16} />
+          </span>
+        </div>
+        <div className="value">
+          {articles.length.toLocaleString()}
+        </div>
+        <div className="delta">Explore the selected evidence <Icon name="arrow" size={14} /></div>
+      </button>
+      <button className="tile tile-action" onClick={() => onNews(true)}>
+        <div className="tile-top">
+          <span className="label">Peak signals</span>
+          <span className="mini-icon amber">
+            <Icon name="signal" size={16} />
+          </span>
+        </div>
+        <div className="value">
+          {claimIds.size}
+        </div>
+        <div className="delta">Articles with a detected peak claim <Icon name="arrow" size={14} /></div>
+      </button>
     </div>
   );
 }

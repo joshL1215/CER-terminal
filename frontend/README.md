@@ -22,20 +22,25 @@ npm run build        # type-check + production build to dist/
 npm run preview
 ```
 
-## What's on the page
+## Client workspace
 
-| Section | What it shows |
-| --- | --- |
-| Filter row | Date range, category, source, search. Scopes **everything** below it, so all numbers agree. |
-| Stat tiles | Consensus peak year (the hero figure), P(peak ≤ 2030), sources blended, articles in view, peak claims found in the news. |
-| Consumption chart | 1900–2024 global fossil energy with the consensus p10–p90 window and median overlaid. |
-| Distribution | Probability of each peak year from the weighted Monte-Carlo blend. |
-| Consensus over time | Weekly median as kept articles accumulated: registry-only vs. with the media nowcast. This is the "updation over time" view. |
-| Volume | Kept articles per week, stacked by `rules.yaml` category. |
-| Kept articles | The feed itself. Articles that make a directional peak claim get a **▲ peak signal** chip. |
-| Registry | The curated published positions (IEA, DNV, BP, OPEC, …) behind the consensus, with weights. |
+- **Overview** — median peak year and central 80% range, consumption history, probability distribution,
+  reconstructed consensus timeline, and a three-article news preview. Toggle **Include news signals**
+  to compare the registry-only estimate with the news-adjusted estimate. Click the source, article,
+  or signal tiles to open the supporting evidence.
+- **News intelligence** — coverage by week, topic shortcuts, and an article explorer. Expand article
+  summaries, filter to peak signals, bookmark articles, sort by date, load more, or export the current
+  selection as CSV. Saved articles stay in this browser; they do not sync to an account.
+- **Sources & method** — the original major-source registry, with the same columns, positions,
+  source notes, and methodology wording, presented in the updated layout.
 
-Every chart has a **Table** toggle, so no value is reachable only by hovering.
+The global search, date range, topic, and source filters change the article slice and its contribution
+into the forecast. The static registry remains fixed. Saved/signal filters and sorting inside the
+article list only change that list; the UI labels this distinction. Dates are relative to the dataset's
+as-of date so sample snapshots remain usable.
+
+Every chart has a **Table** view. The interface supports narrow screens, keyboard focus, light/dark
+appearance, and reduced-motion preferences. Sample snapshots and failed live refreshes are labeled.
 
 ## How the number is built (`src/model/`)
 

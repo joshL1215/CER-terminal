@@ -10,4 +10,8 @@ Ultra simplified system design summary:
 - Supabase provides an API for a frontend to do read-only queries on the information we accumulated
 - On the frontend, a user will have a nice interface to scroll through a feed of only relevant article links,
   plus charts that read the feed against the fossil fuel peak question (see [`frontend/README.md`](frontend/README.md))
+
+Forecasting remains a **prototype still in development**: peak detection, news contributions,
+forecast estimates, and related visualizations require methodological validation. Article browsing
+and collection integration are implemented; live connection verification and deployment are pending.
   

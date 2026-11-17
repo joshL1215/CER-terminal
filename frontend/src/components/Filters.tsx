@@ -1,9 +1,9 @@
 import type { Feed } from "../data/types";
-import { CATEGORIES, DEFAULT_FILTERS, OTHER, type Filters, type RangePreset } from "../model/analysis";
+import { DEFAULT_FILTERS, OTHER, type Filters, type RangePreset } from "../model/analysis";
 import { Icon } from "./Icon";
 
 const PRESETS: { value: RangePreset; label: string }[] = [{ value: "7", label: "7 days" }, { value: "30", label: "30 days" }, { value: "90", label: "90 days" }, { value: "all", label: "All time" }];
-export function FilterRow({ filters, feeds, count, onChange }: { filters: Filters; feeds: Feed[]; count: number; onChange: (next: Filters) => void }) {
+export function FilterRow({ filters, feeds, categories, count, onChange }: { filters: Filters; feeds: Feed[]; categories: string[]; count: number; onChange: (next: Filters) => void }) {
   const set = (patch: Partial<Filters>) => onChange({ ...filters, ...patch });
   const active = filters.range !== "all" || filters.category !== "all" || filters.feed !== "all" || Boolean(filters.query);
   return (
@@ -19,10 +19,9 @@ export function FilterRow({ filters, feeds, count, onChange }: { filters: Filter
         </label>
         <select aria-label="Category" value={filters.category} onChange={(e) => set({ category: e.target.value })}>
           <option value="all">All topics</option>
-          {CATEGORIES.map((c) => <option key={c} value={c}>
-            {c[0].toUpperCase() + c.slice(1)}
+          {categories.map((c) => <option key={c} value={c}>
+            {c === OTHER ? "Other / unclassified" : c[0].toUpperCase() + c.slice(1)}
           </option>)}
-          <option value={OTHER}>Other / unclassified</option>
         </select>
         <select aria-label="Source" value={filters.feed} onChange={(e) => set({ feed: e.target.value })}>
           <option value="all">All news sources</option>

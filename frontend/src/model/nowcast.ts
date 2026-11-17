@@ -50,6 +50,7 @@ export function peakClaims(articles: Article[], asOf: Date): PeakClaim[] {
   for (const article of articles) {
     if (!article.published_at) continue;
     const published = new Date(article.published_at);
+    if (!Number.isFinite(published.getTime())) continue;
     if (published > asOf) continue;
     const claim = extractClaim(`${article.title} ${article.description ?? ""}`, published.getFullYear());
     if (!claim || claim.year < 2015 || claim.year > 2060) continue;

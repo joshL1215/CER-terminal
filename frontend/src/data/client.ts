@@ -1,7 +1,10 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 import sample from "./sample.json";
+import { isLiveConfigured, readDataConfig } from "./config";
 import type { Article, Dataset, Feed } from "./types";
+
+export { isLiveConfigured } from "./config";
 
 // RLS grants are per column, so `select=*` is rejected: list the public columns.
 const ARTICLE_COLUMNS = "id, url, title, description, published_at, category, feed_id";
@@ -9,36 +12,54 @@ const FEED_COLUMNS = "id, name, url, category, tags";
 const PAGE = 1000;
 const MAX_ARTICLES = 5000;
 
-const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
-
-export const isLiveConfigured = Boolean(url && anonKey);
-
 let client: SupabaseClient | null = null;
 function getClient(): SupabaseClient {
-  if (!client) client = createClient(url!, anonKey!);
+  if (!client) {
+    const config = readDataConfig(import.meta.env);
+    if (!config) throw new Error("Live data is not configured.");
+    client = createClient(config.url, config.publicKey, {
+      auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+    });
+  }
   return client;
 }
 
-async function fetchArticles(): Promise<Article[]> {
+async function fetchArticles(signal: AbortSignal): Promise<{ articles: Article[]; totalArticles: number }> {
   const rows: Article[] = [];
-  for (let from = 0; from < MAX_ARTICLES; from += PAGE) {
-    const { data, error } = await getClient()
+  let totalArticles: number | null = null;
+  while (rows.length < MAX_ARTICLES) {
+    const from = rows.length;
+    const { data, error, count } = await getClient()
       .from("articles")
-      .select(ARTICLE_COLUMNS)
+      .select(ARTICLE_COLUMNS, from === 0 ? { count: "exact" } : {})
       .order("published_at", { ascending: false, nullsFirst: false })
-      .range(from, from + PAGE - 1);
+      .order("id", { ascending: false })
+      .range(from, Math.min(from + PAGE, MAX_ARTICLES) - 1)
+      .abortSignal(signal);
     if (error) throw new Error(`articles: ${error.message}`);
+    if (count !== null) totalArticles = count;
     rows.push(...(data as Article[]));
-    if (data.length < PAGE) break;
+    // Advance by the rows actually returned: the project's API row limit can
+    // be smaller than PAGE. An exact count avoids mistaking a short page for EOF.
+    if (!data.length || (totalArticles !== null && rows.length >= totalArticles)) break;
   }
-  return rows;
+  return { articles: rows, totalArticles: totalArticles ?? rows.length };
 }
 
-async function fetchFeeds(): Promise<Feed[]> {
-  const { data, error } = await getClient().from("feeds").select(FEED_COLUMNS);
-  if (error) throw new Error(`feeds: ${error.message}`);
-  return data as Feed[];
+async function fetchFeeds(signal: AbortSignal): Promise<Feed[]> {
+  const rows: Feed[] = [];
+  let total: number | null = null;
+  while (true) {
+    const { data, error, count } = await getClient().from("feeds")
+      .select(FEED_COLUMNS, rows.length === 0 ? { count: "exact" } : {})
+      .order("id")
+      .range(rows.length, rows.length + PAGE - 1)
+      .abortSignal(signal);
+    if (error) throw new Error(`feeds: ${error.message}`);
+    if (count !== null) total = count;
+    rows.push(...(data as Feed[]));
+    if (!data.length || (total !== null && rows.length >= total)) return rows;
+  }
 }
 
 export function loadSample(): Dataset {
@@ -47,11 +68,21 @@ export function loadSample(): Dataset {
     feeds: sample.feeds as Feed[],
     mode: "sample",
     asOf: new Date(sample.generated),
+    totalArticles: sample.articles.length,
   };
 }
 
-export async function loadDataset(): Promise<Dataset> {
+/** No sample rows are presented as live while a request is loading or failing. */
+export function initialDataset(): Dataset {
+  return isLiveConfigured
+    ? { articles: [], feeds: [], mode: "live", asOf: new Date(), totalArticles: 0 }
+    : loadSample();
+}
+
+export async function loadDataset(signal?: AbortSignal): Promise<Dataset> {
   if (!isLiveConfigured) return loadSample();
-  const [articles, feeds] = await Promise.all([fetchArticles(), fetchFeeds()]);
-  return { articles, feeds, mode: "live", asOf: new Date() };
+  const timeout = AbortSignal.timeout(30_000);
+  const requestSignal = signal ? AbortSignal.any([signal, timeout]) : timeout;
+  const [{ articles, totalArticles }, feeds] = await Promise.all([fetchArticles(requestSignal), fetchFeeds(requestSignal)]);
+  return { articles, feeds, totalArticles, mode: "live", asOf: new Date() };
 }

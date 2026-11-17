@@ -34,7 +34,12 @@ npm run preview
 - **Sources & method** — the original major-source registry, with the same columns, positions,
   source notes, and methodology wording, presented in the updated layout.
 
-The global search, date range, topic, and source filters change the article slice and its contribution
+Articles also carry **region** and **energy-type** tags (`src/model/tags.ts`), found by plain keyword rules on
+the title and summary, with no AI. They power the Region and Energy type filters, the chips on each article, and two
+extra CSV columns. A tag means the article *mentions* that place or energy type, not that it is mainly about it.
+Edit the patterns in `tags.ts` to change what counts.
+
+The global search, date range, topic, region, energy-type, and source filters change the article slice and its contribution
 into the forecast. The static registry remains fixed. Saved/signal filters and sorting inside the
 article list only change that list; the UI labels this distinction. Dates are relative to the dataset's
 as-of date so sample snapshots remain usable.

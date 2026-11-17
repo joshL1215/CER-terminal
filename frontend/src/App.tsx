@@ -9,6 +9,7 @@ import { VolumeChart } from "./components/VolumeChart";
 import { isLiveConfigured, loadDataset, loadSample } from "./data/client";
 import type { Dataset } from "./data/types";
 import { analyze, DEFAULT_FILTERS, type Filters } from "./model/analysis";
+import { tagCounts } from "./model/tags";
 
 type View = "overview" | "news" | "sources";
 const NAV: { id: View; label: string; icon: IconName }[] = [{ id: "overview", label: "Overview", icon: "overview" }, { id: "news", label: "News intelligence", icon: "news" }, { id: "sources", label: "Sources & method", icon: "sources" }];
@@ -44,6 +45,7 @@ export default function App() {
   }, [theme]);
 
   const analysis = useMemo(() => analyze(dataset, filters), [dataset, filters]);
+  const datasetTags = useMemo(() => tagCounts(dataset.articles), [dataset.articles]);
   const consensus = includeNews ? analysis.withNowcast : analysis.registryOnly;
   const shift = analysis.withNowcast.median - analysis.registryOnly.median;
   const asOf = dataset.asOf.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
@@ -138,7 +140,7 @@ export default function App() {
             <button className="text-button" onClick={() => openView("sources")}>About the data <Icon name="arrow" size={14} /></button>
           </div>}
 
-          {view !== "sources" && <FilterRow filters={filters} feeds={dataset.feeds} count={analysis.articles.length} onChange={setFilters} />}
+          {view !== "sources" && <FilterRow filters={filters} feeds={dataset.feeds} count={analysis.articles.length} tags={datasetTags} onChange={setFilters} />}
 
           <div className="view-content" key={view}>
 

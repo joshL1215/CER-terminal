@@ -20,13 +20,14 @@ export function toBlendSource(nc: { mean: number; sigma: number; weight: number 
   return { year: nc.mean, sigma: nc.sigma, weight: nc.weight, censored: false };
 }
 
+/** `registryOnly` is the registry median, which does not change week to week. */
 export function consensusTimeline(
   articles: Article[],
   base: BlendSource[],
   asOf: Date,
+  registryOnly: number,
   weeks = 12,
 ): TimelinePoint[] {
-  const registryOnly = blend(base, STEP_DRAWS).median;
   const dated = articles.filter((a) => a.published_at).map((a) => ({ a, t: new Date(a.published_at!).getTime() }));
   const points: TimelinePoint[] = [];
   for (let i = weeks; i >= 0; i--) {
@@ -37,7 +38,7 @@ export function consensusTimeline(
       date,
       label: date.toLocaleDateString(undefined, { month: "short", day: "numeric" }),
       registryOnly,
-      withNowcast: nc ? blend([...base, toBlendSource(nc)], STEP_DRAWS).median : registryOnly,
+      withNowcast: nc ? blend([...base, toBlendSource(nc)], date.getFullYear(), STEP_DRAWS).median : registryOnly,
       claims: nc?.claims.length ?? 0,
       articlesSeen: seen.length,
     });

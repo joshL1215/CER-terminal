@@ -42,11 +42,11 @@ describe("live pipeline dashboard", () => {
     expect(await screen.findByText("Live articles")).toBeTruthy();
     expect(screen.getByRole("link", { name: "Fossil fuels peak in 2030" }).getAttribute("href")).toBe(dataset.articles[0].url);
     expect(screen.queryByText("Sample data")).toBeNull();
-    await user.click(screen.getByRole("button", { name: "News intelligence" }));
+    await user.click(screen.getByRole("button", { name: "News Feed" }));
     expect(screen.getAllByRole("article")).toHaveLength(2);
     expect(screen.getByRole("option", { name: "Hydrogen" })).toBeTruthy();
-    await user.click(screen.getByRole("button", { name: "Show table: What the feed is talking about" }));
-    const table = screen.getByRole("region", { name: "What the feed is talking about data table" });
+    await user.click(screen.getByRole("button", { name: "Show table: Articles per week" }));
+    const table = screen.getByRole("region", { name: "Articles per week data table" });
     expect(within(table).getByRole("columnheader", { name: "hydrogen" })).toBeTruthy();
     await user.click(screen.getByRole("button", { name: /Peak signals 1/ }));
     expect(screen.getAllByRole("article")).toHaveLength(1);
@@ -78,7 +78,7 @@ describe("live pipeline dashboard", () => {
     const user = userEvent.setup();
     render(<App />);
     await screen.findByText("Live articles");
-    await user.click(screen.getByRole("button", { name: "News intelligence" }));
+    await user.click(screen.getByRole("button", { name: "News Feed" }));
     await user.selectOptions(screen.getByRole("combobox", { name: "Category" }), "renewables");
     await user.selectOptions(screen.getByRole("combobox", { name: "Region" }), "asia");
     await user.selectOptions(screen.getByRole("combobox", { name: "Energy type" }), "solar");

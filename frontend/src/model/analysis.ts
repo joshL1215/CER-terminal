@@ -64,11 +64,63 @@ export interface Analysis {
 
 const DAY = 86_400_000;
 
+const TIMELINE_WEEKS = 12;
+
+// The registry is fixed, so its blend only depends on the as-of year. Caching it
+// keeps typing in the search box from re-running 20,000 draws on every keystroke.
+const registryCache = new Map<number, { registry: Forecast[]; base: BlendSource[]; registryOnly: Consensus }>();
+function registryBlend(year: number) {
+  let cached = registryCache.get(year);
+  if (!cached) {
+    const registry = cleanRegistry();
+    const base: BlendSource[] = baselineSources(registry).map((r) => ({
+      year: r.peakYear,
+      sigma: r.sigma,
+      weight: r.weight,
+      censored: r.censored,
+    }));
+    cached = { registry, base, registryOnly: blend(base, year) };
+    registryCache.set(year, cached);
+  }
+  return cached;
+}
+
 function weekStart(d: Date): Date {
   const w = new Date(d);
   w.setHours(0, 0, 0, 0);
   w.setDate(w.getDate() - ((w.getDay() + 6) % 7)); // Monday
   return w;
+}
+
+/** Articles per week by category, with empty weeks kept so the time axis is even. */
+export function weeklyVolume(articles: Article[]): WeekVolume[] {
+  const counts = new Map<number, Record<string, number>>();
+  for (const a of articles) {
+    if (!a.published_at) continue;
+    const t = Date.parse(a.published_at);
+    if (!Number.isFinite(t)) continue;
+    const key = weekStart(new Date(t)).getTime();
+    const bucket = counts.get(key) ?? {};
+    const cat = a.category ?? OTHER;
+    bucket[cat] = (bucket[cat] ?? 0) + 1;
+    counts.set(key, bucket);
+  }
+  if (!counts.size) return [];
+  const keys = [...counts.keys()];
+  const first = new Date(Math.min(...keys));
+  const last = Math.max(...keys);
+  const spansYears = first.getFullYear() !== new Date(last).getFullYear();
+  const volume: WeekVolume[] = [];
+  for (const w = new Date(first); w.getTime() <= last; w.setDate(w.getDate() + 7)) {
+    const weekCounts = counts.get(w.getTime()) ?? {};
+    volume.push({
+      weekStart: new Date(w),
+      label: w.toLocaleDateString(undefined, spansYears ? { year: "numeric", month: "short", day: "numeric" } : { month: "short", day: "numeric" }),
+      counts: weekCounts,
+      total: Object.values(weekCounts).reduce((n, c) => n + c, 0),
+    });
+  }
+  return volume;
 }
 
 export function applyFilters(dataset: Dataset, filters: Filters): Article[] {
@@ -100,41 +152,17 @@ export function analyze(dataset: Dataset, filters: Filters): Analysis {
   const articles = applyFilters(dataset, filters);
   const feedsById = new Map(dataset.feeds.map((f) => [f.id, f]));
 
-  const registry = cleanRegistry();
-  const base: BlendSource[] = baselineSources(registry).map((r) => ({
-    year: r.peakYear,
-    sigma: r.sigma,
-    weight: r.weight,
-    censored: r.censored,
-  }));
+  const year = dataset.asOf.getFullYear();
+  const { registry, base, registryOnly } = registryBlend(year);
 
   const nowcast = computeNowcast(articles, dataset.asOf);
   const claimIds = new Map(nowcast?.claims.map((c) => [c.article.id, c.year]) ?? []);
-  const registryOnly = blend(base);
-  const withNowcast = nowcast ? blend([...base, toBlendSource(nowcast)]) : registryOnly;
-  const timeline = consensusTimeline(articles, base, dataset.asOf);
+  const withNowcast = nowcast ? blend([...base, toBlendSource(nowcast)], year) : registryOnly;
+  // Only go back as far as the date filter allows, so earlier points don't look news-free.
+  const timelineWeeks = filters.range === "all" ? TIMELINE_WEEKS : Math.max(1, Math.min(TIMELINE_WEEKS, Math.floor(Number(filters.range) / 7)));
+  const timeline = consensusTimeline(articles, base, dataset.asOf, registryOnly.median, timelineWeeks);
 
-  const weeks = new Map<number, WeekVolume>();
-  for (const a of articles) {
-    if (!a.published_at) continue;
-    if (!Number.isFinite(Date.parse(a.published_at))) continue;
-    const ws = weekStart(new Date(a.published_at));
-    const key = ws.getTime();
-    let bucket = weeks.get(key);
-    if (!bucket) {
-      bucket = {
-        weekStart: ws,
-        label: ws.toLocaleDateString(undefined, { month: "short", day: "numeric" }),
-        counts: {},
-        total: 0,
-      };
-      weeks.set(key, bucket);
-    }
-    const cat = a.category ?? OTHER;
-    bucket.counts[cat] = (bucket.counts[cat] ?? 0) + 1;
-    bucket.total += 1;
-  }
-  const volume = [...weeks.values()].sort((a, b) => a.weekStart.getTime() - b.weekStart.getTime());
+  const volume = weeklyVolume(articles);
   const categoriesInView = articleCategories(articles);
 
   return {

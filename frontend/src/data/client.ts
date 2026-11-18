@@ -25,10 +25,13 @@ function getClient(): SupabaseClient {
 }
 
 async function fetchArticles(signal: AbortSignal): Promise<{ articles: Article[]; totalArticles: number }> {
-  const rows: Article[] = [];
+  // Keyed by id: if new articles arrive while paging, later pages shift and can
+  // repeat rows that were already read.
+  const byId = new Map<number, Article>();
+  let offset = 0;
   let totalArticles: number | null = null;
-  while (rows.length < MAX_ARTICLES) {
-    const from = rows.length;
+  while (offset < MAX_ARTICLES) {
+    const from = offset;
     const { data, error, count } = await getClient()
       .from("articles")
       .select(ARTICLE_COLUMNS, from === 0 ? { count: "exact" } : {})
@@ -38,12 +41,14 @@ async function fetchArticles(signal: AbortSignal): Promise<{ articles: Article[]
       .abortSignal(signal);
     if (error) throw new Error(`articles: ${error.message}`);
     if (count !== null) totalArticles = count;
-    rows.push(...(data as Article[]));
+    for (const a of data as Article[]) byId.set(a.id, a);
     // Advance by the rows actually returned: the project's API row limit can
     // be smaller than PAGE. An exact count avoids mistaking a short page for EOF.
-    if (!data.length || (totalArticles !== null && rows.length >= totalArticles)) break;
+    offset += data.length;
+    if (!data.length || (totalArticles !== null && offset >= totalArticles)) break;
   }
-  return { articles: rows, totalArticles: totalArticles ?? rows.length };
+  const articles = [...byId.values()];
+  return { articles, totalArticles: totalArticles ?? articles.length };
 }
 
 async function fetchFeeds(signal: AbortSignal): Promise<Feed[]> {

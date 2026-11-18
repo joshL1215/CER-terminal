@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
 import { ArticleFeed } from "./components/ArticleFeed";
 import { FilterRow } from "./components/Filters";
 import { Icon, type IconName } from "./components/Icon";
@@ -12,10 +12,11 @@ import { analyze, articleCategories, DEFAULT_FILTERS, type Filters } from "./mod
 import { tagCounts } from "./model/tags";
 
 type View = "overview" | "news" | "sources";
-const NAV: { id: View; label: string; icon: IconName }[] = [{ id: "overview", label: "Overview", icon: "overview" }, { id: "news", label: "News intelligence", icon: "news" }, { id: "sources", label: "Sources & method", icon: "sources" }];
+const NAV: { id: View; label: string; icon: IconName }[] = [{ id: "overview", label: "Overview", icon: "overview" }, { id: "news", label: "News Feed", icon: "news" }, { id: "sources", label: "Sources & method", icon: "sources" }];
 function readTheme(): "light" | "dark" {
-  try { const value = localStorage.getItem("cer-theme"); if (value === "light" || value === "dark") return value; } catch { /* use the default */ }
-  return "light";
+  // index.html applies the same choice before React loads, so there is no flash.
+  try { const value = localStorage.getItem("cer-theme"); if (value === "light" || value === "dark") return value; } catch { /* use the system setting */ }
+  return window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
 export default function App() {
@@ -46,7 +47,9 @@ export default function App() {
     try { localStorage.setItem("cer-theme", theme); } catch { /* the toggle still works without storage */ }
   }, [theme]);
 
-  const analysis = useMemo(() => analyze(dataset, filters), [dataset, filters]);
+  // Typing in search stays responsive; the charts and estimate catch up a moment later.
+  const deferredFilters = useDeferredValue(filters);
+  const analysis = useMemo(() => analyze(dataset, deferredFilters), [dataset, deferredFilters]);
   const datasetTags = useMemo(() => tagCounts(dataset.articles), [dataset.articles]);
   const categories = useMemo(() => articleCategories(dataset.articles), [dataset.articles]);
   const articlesLoading = loading && !hasLoaded;
@@ -66,14 +69,19 @@ export default function App() {
     <div className="app-shell">
       <a className="skip-link" href="#main">Skip to content</a>
       <aside className="sidebar">
-        <a className="brand" href="#" onClick={(e) => { e.preventDefault(); openView("overview"); }} aria-label="CER Terminal home">
-          <span className="brand-mark">
-            <span />
-            <span />
-            <span />
-            <span />
+        <a className="brand" href="#" onClick={(e) => { e.preventDefault(); openView("overview"); }} aria-label="Center for Energy Research and Data Science Student Society: home">
+          {/* Each logo is a stack of single-colour masks, so every part can follow the theme. */}
+          <span className="logo-mask cer-logo" aria-hidden="true">
+            <span className="cer-logo-orange" />
+            <span className="cer-logo-blue" />
+            <span className="cer-logo-text" />
           </span>
-          <span>CER<span className="brand-light"> Terminal</span><small>ENERGY INTELLIGENCE</small></span>
+          <span className="brand-divider" aria-hidden="true" />
+          <span className="logo-mask ds3-logo" aria-hidden="true">
+            <span className="ds3-logo-orange" />
+            <span className="ds3-logo-teal" />
+            <span className="ds3-logo-text" />
+          </span>
         </a>
         <div className="nav-label">WORKSPACE</div>
         <nav aria-label="Main navigation">
@@ -87,7 +95,7 @@ export default function App() {
         </nav>
         <div className="sidebar-bottom">
           <div className="sidebar-rule" />
-          <span>Center for Energy Research</span>
+          <span>Center for Energy Research × DS3</span>
           <button className="theme-button" onClick={() => setTheme((t) => t === "dark" ? "light" : "dark")} aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}>
             <Icon name={theme === "dark" ? "sun" : "moon"} size={16} />
             <span>
@@ -118,15 +126,13 @@ export default function App() {
         <main id="main" className="main" tabIndex={-1}>
           <div className="page-heading">
             <div>
-              <div className="eyebrow"><span /> THE FOSSIL FUEL PEAK OBSERVATORY</div>
               <h1 className={view === "overview" ? "outlook-title" : undefined}>
-                {view === "overview" ? "When will fossil fuels peak?" : view === "news" ? "News intelligence" : "Sources & method"}
+                {view === "overview" ? "When will fossil fuels peak?" : view === "news" ? "News Feed" : "Sources & method"}
               </h1>
               <p>
-                {view === "overview" ? "Track the outlook. Understand the uncertainty. Explore the evidence behind the shift." : view === "news" ? "Screened energy news, connected to the question that matters." : "Published outlooks and how news enters the number."}
+                {view === "overview" ? "An estimate of the year global fossil fuel use peaks, based on published outlooks and recent news." : view === "news" ? "Energy news articles. Filter by topic, region, energy type or source." : "The outlooks behind the estimate, and how news is counted."}
               </p>
             </div>
-            <span className="edition">CER / {dataset.asOf.getFullYear()}<span>ENERGY OUTLOOK</span></span>
           </div>
 
           {error && <div className="error" role="alert">
@@ -141,13 +147,13 @@ export default function App() {
 
           {dataset.mode === "sample" && <div className="sample-notice">
             <span className="notice-symbol">i</span>
-            <span><strong>You’re exploring a sample snapshot.</strong> Articles are from {asOf}. Connect live data when your project credentials are available.</span>
+            <span><strong>Showing sample data.</strong> These articles are from {asOf}. Live data appears once the Supabase settings are configured.</span>
             <button className="text-button" onClick={() => openView("sources")}>About the data <Icon name="arrow" size={14} /></button>
           </div>}
 
           {dataset.totalArticles > dataset.articles.length && <div className="sample-notice" role="status">
             <span className="notice-symbol">i</span>
-            <span>Showing the newest {dataset.articles.length.toLocaleString()} of {dataset.totalArticles.toLocaleString()} screened articles. Search, charts, saved articles, and exports use this loaded selection.</span>
+            <span>Showing the newest {dataset.articles.length.toLocaleString()} of {dataset.totalArticles.toLocaleString()} screened articles. Search, charts, saved articles and exports only use these.</span>
           </div>}
 
           {view !== "news" && <aside className="prototype-notice" aria-label="Forecasting development status">
@@ -163,15 +169,14 @@ export default function App() {
               <div className="outlook-grid">
                 <section className="forecast-panel" aria-label="Peak year estimate" aria-busy={loading}>
                   <div className="forecast-top">
-                    <span className="eyebrow">EXPERIMENTAL OUTLOOK</span>
                     <span className="forecast-tag">Prototype</span>
                   </div>
-                  <h2>Global fossil fuel peak</h2>
+                  <h2>Estimated peak year</h2>
                   <div className="forecast-year" key={consensus.median.toFixed(1)}>
                     {consensus.median.toFixed(0)}
                     <span>median year</span>
                   </div>
-                  <p className="forecast-range">Central 80% range <strong>{consensus.p10.toFixed(0)}–{consensus.p90.toFixed(0)}</strong></p>
+                  <p className="forecast-range">80% likely between <strong>{consensus.p10.toFixed(0)}–{consensus.p90.toFixed(0)}</strong></p>
                   <div className="range-graphic" aria-hidden="true">
                     <span />
                     <span />
@@ -196,10 +201,8 @@ export default function App() {
               <StatTiles analysis={analysis} consensus={consensus} onNews={openNews} onSources={() => openView("sources")} />
               <div className="section-heading">
                 <div>
-                  <span className="eyebrow">BEYOND A SINGLE YEAR</span>
-                  <h2>The shape of the outlook</h2>
+                  <h2>How certain is the estimate?</h2>
                 </div>
-                <span className="section-aside">Uncertainty is part of the picture.</span>
               </div>
               <div className="grid-2">
                 <DistributionChart consensus={consensus} dim={loading} />
@@ -210,17 +213,16 @@ export default function App() {
                   <Icon name="signal" size={21} />
                 </div>
                 <div>
-                  <h3>What is the news telling us?</h3>
+                  <h3>Peak claims in the news</h3>
                   <p>
-                    {analysis.nowcast ? `${analysis.claimIds.size} article${analysis.claimIds.size === 1 ? " contains" : "s contain"} a detected peak claim. Their combined influence is capped and fades with age.` : "No directional peak claims were detected in these articles. Broader energy coverage provides context without moving the estimate."}
+                    {analysis.nowcast ? `${analysis.claimIds.size} article${analysis.claimIds.size === 1 ? " contains" : "s contain"} a detected peak claim. Together they can only shift the estimate a limited amount, and older articles count for less.` : "None of these articles say when fossil fuels will peak, so the estimate uses the published outlooks only."}
                   </p>
                 </div>
-                <button className="text-button" onClick={() => openNews(true)}>Inspect the signals <Icon name="arrow" size={16} /></button>
+                <button className="text-button" onClick={() => openNews(true)}>See these articles <Icon name="arrow" size={16} /></button>
               </section>
               <div className="section-heading">
                 <div>
-                  <span className="eyebrow">FROM THE NEWS DESK</span>
-                  <h2>Latest intelligence</h2>
+                  <h2>Latest articles</h2>
                 </div>
                 <button className="text-button" onClick={() => openNews(false)}>View all articles <Icon name="arrow" size={16} /></button>
               </div>
@@ -230,19 +232,12 @@ export default function App() {
             {view === "news" && <>
               <div className="news-layout">
                 <div>
-                  <div className="section-heading compact">
-                    <div>
-                      <span className="eyebrow">COVERAGE AT A GLANCE</span>
-                      <h2>The conversation over time</h2>
-                    </div>
-                  </div>
                   <VolumeChart volume={analysis.volume} categories={analysis.categoriesInView} dim={loading} />
                 </div>
                 <section className="topics-card">
-                  <span className="eyebrow">IN YOUR SELECTION</span>
-                  <h2>Topics in focus</h2>
-                  <p>Select a topic to explore its coverage.</p>
-                  {topics.length ? topics.map(([topic, count]) => <button className="topic-row" key={topic} onClick={() => setFilters((f) => ({ ...f, category: f.category === topic ? "all" : topic }))}>
+                  <h2>Top topics</h2>
+                  <p>Click a topic to show only its articles.</p>
+                  {topics.length ? topics.map(([topic, count]) => <button className="topic-row" key={topic} aria-pressed={filters.category === topic} onClick={() => setFilters((f) => ({ ...f, category: f.category === topic ? "all" : topic }))}>
                     <span>
                       {topic}
                     </span>
@@ -275,10 +270,6 @@ export default function App() {
             </>}
 
           </div>
-          <footer className="footer">
-            <span><span className="footer-mark">CER</span> Energy intelligence, with perspective.</span>
-            <span>Energy news, screened daily</span>
-          </footer>
         </main>
       </div>
     </div>

@@ -15,7 +15,7 @@ import {
   YAxis,
 } from "recharts";
 
-import type { Consensus } from "../model/consensus";
+import { HISTOGRAM_END, HISTOGRAM_START, type Consensus } from "../model/consensus";
 import { FOSSIL_HISTORY } from "../model/history";
 import type { TimelinePoint } from "../model/timeline";
 import { useReducedMotion } from "../useReducedMotion";
@@ -29,14 +29,16 @@ const CURSOR_FILL = { fill: "var(--hover-wash)" } as const;
 
 const fmt0 = (n: number) => n.toFixed(0);
 const fmt1 = (n: number) => n.toFixed(1);
+/** The first and last histogram bars also hold the draws outside the axis. */
+const yearBin = (year: number) => year === HISTOGRAM_START ? `${year} or earlier` : year === HISTOGRAM_END ? `${year} or later` : String(year);
 
 export function HistoryChart({ consensus, dim }: { consensus: Consensus; dim?: boolean }) {
   const reducedMotion = useReducedMotion();
   const data = FOSSIL_HISTORY.map((p) => ({ year: p.year, twh: p.twh / 1000 }));
   return (
     <ChartCard
-      title="The long view of fossil energy"
-      subtitle={`Historical consumption · thousand TWh per year. Prototype forecast shading marks the central 80% peak-timing range (${fmt0(consensus.p10)}–${fmt0(consensus.p90)}).`}
+      title="Global fossil fuel use since 1900"
+      subtitle={`Thousand TWh per year. The shaded band is the 80% range for the estimated peak (${fmt0(consensus.p10)}–${fmt0(consensus.p90)}).`}
       dim={dim}
       columns={[
         { key: "year", label: "Year" },
@@ -102,14 +104,14 @@ export function DistributionChart({ consensus, dim }: { consensus: Consensus; di
   const data = consensus.histogram;
   return (
     <ChartCard
-      title="Where the peak year lands"
-      subtitle={`Prototype distribution · still in development. ${consensus.draws.toLocaleString()} weighted model draws.`}
+      title="Chance of peaking in each year"
+      subtitle={`Prototype · based on ${consensus.draws.toLocaleString()} simulated outcomes.`}
       dim={dim}
       columns={[
         { key: "year", label: "Year" },
         { key: "p", label: "Probability", numeric: true },
       ]}
-      rows={data.filter((d) => d.p > 0.001).map((d) => ({ year: d.year, p: `${(d.p * 100).toFixed(1)}%` }))}
+      rows={data.filter((d) => d.p > 0.001).map((d) => ({ year: yearBin(d.year), p: `${(d.p * 100).toFixed(1)}%` }))}
     >
       <ResponsiveContainer width="100%" height={240}>
         <BarChart data={data} margin={{ top: 12, right: 12, bottom: 4, left: 0 }} barCategoryGap={2}>
@@ -118,7 +120,7 @@ export function DistributionChart({ consensus, dim }: { consensus: Consensus; di
           <YAxis {...AXIS} width={40} tickFormatter={(v: number) => `${(v * 100).toFixed(0)}%`} />
           <Tooltip
             cursor={CURSOR_FILL}
-            content={<ChartTooltip title={(l) => `${l}`} format={(v) => `${(Number(v) * 100).toFixed(1)}%`} />}
+            content={<ChartTooltip title={(l) => yearBin(Number(l))} format={(v) => `${(Number(v) * 100).toFixed(1)}%`} />}
           />
           <ReferenceLine x={consensus.median} stroke="var(--series-2)" strokeWidth={2} />
           <Bar
@@ -150,8 +152,8 @@ export function TimelineChart({ points, dim }: { points: TimelinePoint[]; dim?: 
     );
   return (
     <ChartCard
-      title="Consensus over time"
-      subtitle="Prototype reconstruction · still in development. Weekly medians compare a fixed registry with accumulating news."
+      title="Estimate week by week"
+      subtitle="Prototype · the estimate from published outlooks alone, and with the news up to each week."
       dim={dim}
       columns={[
         { key: "label", label: "Week of" },

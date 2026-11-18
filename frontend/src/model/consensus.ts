@@ -13,12 +13,11 @@ export interface Consensus {
   p90: number;
   pBy2030: number;
   pAlreadyPeaked: number;
-  /** Probability mass per integer year, 2020..2060. */
+  /** Probability mass per integer year, 2020..2060. The end bins also hold draws before 2020 / after 2060. */
   histogram: { year: number; p: number }[];
   draws: number;
 }
 
-export const CURRENT_YEAR = 2026;
 const CENSOR_YEAR = 2050;
 const CENSOR_SPREAD = 4;
 
@@ -34,7 +33,11 @@ function rng(seed: number) {
   };
 }
 
-export function blend(sources: BlendSource[], draws = 20000, seed = 42): Consensus {
+export const HISTOGRAM_START = 2020;
+export const HISTOGRAM_END = 2060;
+
+/** `currentYear` is the as-of year: draws before it count as "already peaked". */
+export function blend(sources: BlendSource[], currentYear: number, draws = 20000, seed = 42): Consensus {
   const rand = rng(seed);
   const normal = () => {
     const u = Math.max(rand(), 1e-9);
@@ -67,18 +70,18 @@ export function blend(sources: BlendSource[], draws = 20000, seed = 42): Consens
   };
   const bins = new Map<number, number>();
   for (let i = 0; i < draws; i++) {
-    const y = Math.floor(out[i]);
+    const y = Math.min(HISTOGRAM_END, Math.max(HISTOGRAM_START, Math.floor(out[i])));
     bins.set(y, (bins.get(y) ?? 0) + 1);
   }
   const histogram = [];
-  for (let y = 2020; y <= 2060; y++) histogram.push({ year: y, p: (bins.get(y) ?? 0) / draws });
+  for (let y = HISTOGRAM_START; y <= HISTOGRAM_END; y++) histogram.push({ year: y, p: (bins.get(y) ?? 0) / draws });
 
   return {
     median: q(0.5),
     p10: q(0.1),
     p90: q(0.9),
     pBy2030: countLe(2030) / draws,
-    pAlreadyPeaked: countLe(CURRENT_YEAR - 1) / draws,
+    pAlreadyPeaked: countLe(currentYear - 1) / draws,
     histogram,
     draws,
   };

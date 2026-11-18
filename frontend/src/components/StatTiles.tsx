@@ -18,7 +18,7 @@ export function StatTiles({ analysis, consensus, onNews, onSources }: { analysis
           {(consensus.pBy2030 * 100).toFixed(0)}
           <span>%</span>
         </div>
-        <div className="delta">Experimental prototype probability</div>
+        <div className="delta">Prototype estimate</div>
         <div className="probability-track">
           <span style={{ width: `${consensus.pBy2030 * 100}%` }} />
         </div>
@@ -33,11 +33,11 @@ export function StatTiles({ analysis, consensus, onNews, onSources }: { analysis
         <div className="value">
           {sources}
         </div>
-        <div className="delta">Baseline positions in the blend <Icon name="arrow" size={14} /></div>
+        <div className="delta">Outlooks used in the estimate <Icon name="arrow" size={14} /></div>
       </button>
       <button className="tile tile-action" onClick={() => onNews(false)}>
         <div className="tile-top">
-          <span className="label">Screened articles</span>
+          <span className="label">Articles</span>
           <span className="mini-icon">
             <Icon name="news" size={16} />
           </span>
@@ -45,7 +45,7 @@ export function StatTiles({ analysis, consensus, onNews, onSources }: { analysis
         <div className="value">
           {articles.length.toLocaleString()}
         </div>
-        <div className="delta">Explore the selected evidence <Icon name="arrow" size={14} /></div>
+        <div className="delta">View articles <Icon name="arrow" size={14} /></div>
       </button>
       <button className="tile tile-action" onClick={() => onNews(true)}>
         <div className="tile-top">

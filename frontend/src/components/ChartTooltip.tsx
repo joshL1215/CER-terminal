@@ -17,7 +17,7 @@ interface Props {
 export function ChartTooltip({ active, payload, label, title, format }: Props) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="tip" role="status">
+    <div className="tip">
       <div className="tip-title">{title ? title(label) : String(label ?? "")}</div>
       {payload.map((p, i) => (
         <div className="row" key={i}>

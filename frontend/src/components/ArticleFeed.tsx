@@ -48,7 +48,7 @@ export function ArticleFeed({ articles, feedsById, claimIds, preview = false, lo
   const exportArticles = () => {
     const rows = [["Title", "Source", "Published", "Topic", "Regions", "Energy types", "Prototype detected peak year", "URL"], ...visible.map((a) => { const t = tagArticle(a); return [a.title, feedsById.get(a.feed_id)?.name ?? a.feed_id, a.published_at ?? "", a.category ?? OTHER, t.regions.map(tagLabel).join("; "), t.energy.map(tagLabel).join("; "), claimIds.get(a.id) ?? "", a.url]; })];
     const url = URL.createObjectURL(new Blob(["\uFEFF", rows.map((r) => r.map(csvCell).join(",")).join("\r\n")], { type: "text/csv;charset=utf-8;" }));
-    const link = document.createElement("a"); link.href = url; link.download = "cer-energy-intelligence.csv"; document.body.appendChild(link); link.click(); link.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+    const link = document.createElement("a"); link.href = url; link.download = "cer-articles.csv"; document.body.appendChild(link); link.click(); link.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
   return <section className={`article-section${preview ? " preview-feed" : ""}`} aria-label={preview ? "Latest articles" : "News articles"} aria-busy={loading}>
 
@@ -73,7 +73,7 @@ export function ArticleFeed({ articles, feedsById, claimIds, preview = false, lo
 
     {!preview && <p className="note">Peak signals are a prototype still in development. Detected claims and their forecast contributions require validation.</p>}
 
-    {!preview && <div className="feed-count" role="status">{visible.length} article{visible.length === 1 ? "" : "s"}{signalsOnly || savedOnly ? ` · ${[signalsOnly && "peak signals", savedOnly && "saved in this browser"].filter(Boolean).join(" · ")}` : " · selected evidence"}<span>These list controls do not change the forecast.</span></div>}
+    {!preview && <div className="feed-count" role="status">{visible.length} article{visible.length === 1 ? "" : "s"}{signalsOnly || savedOnly ? ` · ${[signalsOnly && "peak signals", savedOnly && "saved in this browser"].filter(Boolean).join(" · ")}` : ""}<span>These list controls do not change the forecast.</span></div>}
 
     {storageError && <p className="note" role="status">Browser storage is unavailable. Saved articles will last for this visit only.</p>}
 

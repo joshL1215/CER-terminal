@@ -4,8 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="light dark" />
-    <meta name="description" content="Explore fossil fuel peak estimates, screened energy news, and the evidence behind the energy transition with CER Terminal." />
-    <title>CER Terminal · Energy Intelligence</title>
+    <meta name="description" content="An estimate of when global fossil fuel use peaks, with the energy news behind it." />
+    <title>CER News Data Platform</title>
+    <script>
+      // Apply the saved or system theme before first paint (App.tsx keeps it in sync).
+      try {
+        var saved = localStorage.getItem("cer-theme");
+        var theme = saved === "light" || saved === "dark" ? saved : matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        document.documentElement.setAttribute("data-theme", theme);
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

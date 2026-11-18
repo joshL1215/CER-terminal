@@ -21,8 +21,8 @@ export function VolumeChart({ volume, categories, dim }: { volume: WeekVolume[];
   ];
   return (
     <ChartCard
-      title="What the feed is talking about"
-      subtitle="Kept articles per week by category"
+      title="Articles per week"
+      subtitle="By topic"
       dim={dim}
       columns={columns}
       rows={data.map((d) => {

@@ -52,6 +52,14 @@ describe("pipeline article loading", () => {
     expect(requests.every((r) => !r.searchParams.has("status") && !r.searchParams.has("active"))).toBe(true);
   });
 
+  it("drops rows repeated across pages when new articles arrive mid-load", async () => {
+    // Page 2 starts with the last row of page 1, as if one article was inserted at the top.
+    const articles = [1, 2, 2, 3].map((id) => ({ ...article, id, url: `https://energy.example/${id}` }));
+    mockApi(articles, [feed], 2);
+    const { loadDataset } = await import("./client");
+    expect((await loadDataset()).articles.map((a) => a.id)).toEqual([1, 2, 3]);
+  });
+
   it("returns an empty live dataset when no screened articles exist", async () => {
     mockApi([]);
     const { loadDataset } = await import("./client");

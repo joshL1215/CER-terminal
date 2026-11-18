@@ -4,6 +4,11 @@
   --surface-1: #fff;
   --surface-2: #edf1f7;
   --text-primary: #202e45;
+  --logo-orange: #f0a500;
+  --logo-blue: #00508f;
+  --logo-text: #141e2d;
+  --ds3-orange: #f58134;
+  --ds3-teal: #19b5ca;
   --text-secondary: #55647a;
   --text-muted: #69788e;
   --accent: #365e9d;
@@ -34,6 +39,11 @@
   --surface-1: #1a2638;
   --surface-2: #233249;
   --text-primary: #e8edf6;
+  --logo-orange: #f5b428;
+  --logo-blue: #6ea5e6;
+  --logo-text: #e8edf6;
+  --ds3-orange: #f79250;
+  --ds3-teal: #3cc4d6;
   --text-secondary: #b8c5d9;
   --text-muted: #9aacc5;
   --accent: #a6c4f4;
@@ -142,62 +152,16 @@ h1, h2, h3, p {
   z-index: 20;
   display: flex;
   flex-direction: column;
-  padding: 36px 21px 22px;
+  /* Even padding both sides; every row inside shares one 12px inset. */
+  padding: 32px 16px 22px;
 }
 
 .brand {
   display: flex;
   align-items: center;
-  gap: 11px;
+  gap: 10px;
   text-decoration: none;
-  font-size: 21px;
-  letter-spacing: -.8px;
-  font-weight: 750;
-  line-height: 1.2;
-}
-
-.brand-light {
-  font-weight: 400;
-}
-
-.brand small {
-  display: block;
-  font-size: 8px;
-  letter-spacing: 2.1px;
-  margin-top: 8px;
-  color: var(--text-muted);
-  font-weight: 500;
-}
-
-.brand-mark {
-  display: flex;
-  height: 35px;
-  gap: 3px;
-  align-items: end;
-  transform: skewY(-12deg);
-}
-
-.brand-mark span {
-  width: 5px;
-  background: var(--accent);
-  border-radius: 1px;
-}
-
-.brand-mark span:nth-child(1) {
-  height: 15px;
-}
-
-.brand-mark span:nth-child(2) {
-  height: 23px;
-}
-
-.brand-mark span:nth-child(3) {
-  height: 32px;
-}
-
-.brand-mark span:nth-child(4) {
-  height: 23px;
-  background: var(--series-2);
+  padding: 0 12px 0 6px;
 }
 
 .nav-label {
@@ -205,7 +169,68 @@ h1, h2, h3, p {
   font-size: 9px;
   font-weight: 650;
   letter-spacing: 1.8px;
-  margin: 60px 13px 14px;
+  margin: 40px 12px 12px;
+}
+
+/* The logo PNGs are alpha masks; each layer is filled with a theme colour. */
+.logo-mask {
+  position: relative;
+  display: block;
+  flex: none;
+}
+
+.logo-mask > span {
+  position: absolute;
+  inset: 0;
+  -webkit-mask: var(--logo-mask) center / 100% 100% no-repeat;
+  mask: var(--logo-mask) center / 100% 100% no-repeat;
+}
+
+.cer-logo {
+  width: 114px;
+  aspect-ratio: 492 / 138;
+}
+
+.cer-logo-orange {
+  --logo-mask: url("./assets/cer-logo-orange.png");
+  background: var(--logo-orange);
+}
+
+.cer-logo-blue {
+  --logo-mask: url("./assets/cer-logo-blue.png");
+  background: var(--logo-blue);
+}
+
+.cer-logo-text {
+  --logo-mask: url("./assets/cer-logo-text.png");
+  background: var(--logo-text);
+}
+
+.brand-divider {
+  flex: none;
+  width: 1px;
+  height: 28px;
+  background: var(--border);
+}
+
+.ds3-logo {
+  height: 34px;
+  aspect-ratio: 334 / 325;
+}
+
+.ds3-logo-orange {
+  --logo-mask: url("./assets/ds3-logo-orange.png");
+  background: var(--ds3-orange);
+}
+
+.ds3-logo-teal {
+  --logo-mask: url("./assets/ds3-logo-teal.png");
+  background: var(--ds3-teal);
+}
+
+.ds3-logo-text {
+  --logo-mask: url("./assets/ds3-logo-text.png");
+  background: var(--logo-text);
 }
 
 nav {
@@ -218,13 +243,13 @@ nav {
   align-items: center;
   gap: 12px;
   width: 100%;
-  padding: 13px;
+  padding: 12px;
   border: 0;
   border-radius: 7px;
   background: transparent;
   color: var(--text-secondary);
   text-align: left;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
 }
 
@@ -249,7 +274,7 @@ nav {
 
 .sidebar-bottom {
   margin-top: auto;
-  padding: 36px 12px 0;
+  padding: 32px 12px 0;
   color: var(--text-muted);
   font-size: 10px;
 }
@@ -363,23 +388,6 @@ nav {
   margin-bottom: 25px;
 }
 
-.eyebrow {
-  color: var(--accent);
-  font-size: 9px;
-  font-weight: 650;
-  letter-spacing: 1.7px;
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-}
-
-.eyebrow > span {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--accent);
-}
-
 h1 {
   font-size: clamp(27px, 2.4vw, 34px);
   font-weight: 600;
@@ -398,23 +406,6 @@ h1 {
   color: var(--text-secondary);
   font-size: 12px;
   margin: 0;
-}
-
-.edition {
-  flex-shrink: 0;
-  text-align: right;
-  font-family: var(--font);
-  font-size: 16px;
-  color: var(--text-secondary);
-}
-
-.edition span {
-  display: block;
-  font-family: var(--font);
-  font-size: 8px;
-  letter-spacing: 1.6px;
-  margin-top: 6px;
-  color: var(--text-muted);
 }
 
 .sample-notice {
@@ -687,12 +678,6 @@ select {
   justify-content: space-between;
 }
 
-.forecast-panel .eyebrow {
-  color: #bdcde5;
-  font-size: 8px;
-  letter-spacing: 1.4px;
-}
-
 .forecast-tag {
   background: #ffffff0c;
   border: 1px solid #ffffff20;
@@ -937,11 +922,6 @@ select {
   font-weight: 500;
   letter-spacing: -.5px;
   margin: 5px 0 0;
-}
-
-.section-aside {
-  color: var(--text-muted);
-  font-size: 10px;
 }
 
 .section-heading.compact {
@@ -1779,26 +1759,6 @@ select {
   cursor: pointer;
 }
 
-.footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 12px;
-  padding-top: 25px;
-  margin-top: 35px;
-  border-top: 1px solid var(--border);
-  font-size: 9px;
-  color: var(--text-muted);
-}
-
-.footer-mark {
-  color: var(--accent);
-  font-size: 12px;
-  font-weight: 650;
-  margin-right: 10px;
-}
-
 @keyframes rise-in {
   from {
     opacity: 0;
@@ -1927,9 +1887,6 @@ select {
   .insight-strip > div:nth-child(2) {
     flex: 1;
   }
-  .edition {
-    display: none;
-  }
 }
 
 @media (max-width: 960px) {
@@ -1942,17 +1899,13 @@ select {
   }
   .brand {
     gap: 8px;
-    font-size: 17px;
+    padding-inline: 10px;
   }
-  .brand small {
-    font-size: 7px;
-    letter-spacing: 1.4px;
+  .cer-logo {
+    width: 84px;
   }
-  .brand-mark {
-    gap: 2px;
-  }
-  .brand-mark span {
-    width: 4px;
+  .ds3-logo {
+    height: 36px;
   }
   .nav-item {
     font-size: 11px;
@@ -2067,9 +2020,6 @@ select {
   .sample-notice .text-button {
     margin-left: 25px;
   }
-  .section-aside {
-    display: none;
-  }
 }
 
 @media (max-width: 640px) {
@@ -2090,12 +2040,7 @@ select {
   }
   .brand {
     font-size: 20px;
-  }
-  .brand small {
-    font-size: 7px;
-  }
-  .brand-mark span {
-    width: 5px;
+    padding-inline: 0;
   }
   .nav-label, .sidebar-bottom {
     display: none;
@@ -2147,10 +2092,6 @@ select {
   .page-heading p {
     font-size: 11px;
     line-height: 1.8;
-  }
-  .eyebrow {
-    font-size: 8px;
-    letter-spacing: 1.2px;
   }
   .sample-notice {
     font-size: 9px;
@@ -2359,9 +2300,6 @@ select {
   }
   .data-provenance {
     padding: 20px;
-  }
-  .footer {
-    font-size: 8px;
   }
   .registry-toolbar .note {
     font-size: 9px;

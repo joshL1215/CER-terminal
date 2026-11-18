@@ -16,8 +16,8 @@ export function FilterRow({ filters, feeds, categories, count, tags, onChange }:
   return (
     <section className="filter-panel" aria-label="Evidence filters">
       <div className="filter-heading">
-        <span>Explore the evidence</span>
-        <span className="filter-note">Filters update the news contribution, charts, and articles.</span>
+        <span>Filters</span>
+        <span className="filter-note">These change the charts, the article list and the news part of the estimate.</span>
       </div>
       <div className="filters">
         <label className="search-field">

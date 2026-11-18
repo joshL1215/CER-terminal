@@ -5,6 +5,7 @@ import type { Article, Dataset, Feed } from "../data/types";
 import { blend, type BlendSource, type Consensus } from "./consensus";
 import { computeNowcast, type Nowcast } from "./nowcast";
 import { baselineSources, cleanRegistry, type Forecast } from "./registry";
+import { tagArticle } from "./tags";
 import { consensusTimeline, toBlendSource, type TimelinePoint } from "./timeline";
 
 export type RangePreset = "7" | "30" | "90" | "all";
@@ -13,10 +14,12 @@ export interface Filters {
   range: RangePreset;
   category: string; // "all" or a category
   feed: string; // "all" or a feed id
+  region: string; // "all" or a region tag id (see tags.ts)
+  energy: string; // "all" or an energy tag id (see tags.ts)
   query: string;
 }
 
-export const DEFAULT_FILTERS: Filters = { range: "all", category: "all", feed: "all", query: "" };
+export const DEFAULT_FILTERS: Filters = { range: "all", category: "all", feed: "all", region: "all", energy: "all", query: "" };
 
 /** Fixed order = fixed color slot; a category keeps its hue whatever is filtered. */
 export const CATEGORIES = [
@@ -81,6 +84,11 @@ export function applyFilters(dataset: Dataset, filters: Filters): Article[] {
       }
       if (filters.category !== "all" && (a.category ?? OTHER) !== filters.category) return false;
       if (filters.feed !== "all" && a.feed_id !== filters.feed) return false;
+      if (filters.region !== "all" || filters.energy !== "all") {
+        const tags = tagArticle(a);
+        if (filters.region !== "all" && !tags.regions.includes(filters.region)) return false;
+        if (filters.energy !== "all" && !tags.energy.includes(filters.energy)) return false;
+      }
       const feed = feedsById.get(a.feed_id);
       if (q && !`${a.title} ${a.description ?? ""} ${feed?.name ?? ""} ${a.category ?? OTHER} ${feed?.tags.join(" ") ?? ""}`.toLowerCase().includes(q)) return false;
       return true;

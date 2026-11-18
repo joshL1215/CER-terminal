@@ -9,6 +9,7 @@ import { VolumeChart } from "./components/VolumeChart";
 import { initialDataset, isLiveConfigured, loadDataset } from "./data/client";
 import type { Dataset } from "./data/types";
 import { analyze, articleCategories, DEFAULT_FILTERS, type Filters } from "./model/analysis";
+import { tagCounts } from "./model/tags";
 
 type View = "overview" | "news" | "sources";
 const NAV: { id: View; label: string; icon: IconName }[] = [{ id: "overview", label: "Overview", icon: "overview" }, { id: "news", label: "News intelligence", icon: "news" }, { id: "sources", label: "Sources & method", icon: "sources" }];
@@ -46,6 +47,7 @@ export default function App() {
   }, [theme]);
 
   const analysis = useMemo(() => analyze(dataset, filters), [dataset, filters]);
+  const datasetTags = useMemo(() => tagCounts(dataset.articles), [dataset.articles]);
   const categories = useMemo(() => articleCategories(dataset.articles), [dataset.articles]);
   const articlesLoading = loading && !hasLoaded;
   const datasetEmpty = hasLoaded && !dataset.articles.length;
@@ -153,7 +155,7 @@ export default function App() {
             <p>Peak detection, news contributions, and forecast visualizations are experimental. The methods and estimates still require validation.</p>
           </aside>}
 
-          {view !== "sources" && <FilterRow filters={filters} feeds={dataset.feeds} categories={categories} count={analysis.articles.length} onChange={setFilters} />}
+          {view !== "sources" && <FilterRow filters={filters} feeds={dataset.feeds} categories={categories} count={analysis.articles.length} tags={datasetTags} onChange={setFilters} />}
 
           <div className="view-content" key={view}>
 

@@ -60,7 +60,22 @@ describe("article controls using pipeline rows", () => {
     expect(csv).toContain('"Report 14","Energy Laboratory"');
     expect(csv).toContain('"Report 1","Energy Laboratory"');
     expect(csv).toContain('"2030","https://news.example/14"');
+    expect(csv).toContain('"Regions","Energy types","Prototype detected peak year"');
     expect(csv.split("\r\n")).toHaveLength(15);
+  });
+
+  it("exports region and energy labels alongside prototype peak claims", async () => {
+    const createObjectURL = vi.fn((_blob: Blob) => "blob:test-export");
+    vi.stubGlobal("URL", class extends URL { static createObjectURL = createObjectURL; static revokeObjectURL = vi.fn(); });
+    vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
+    render(<ArticleFeed {...props} articles={[{ ...articles[0], title: "China expands solar generation" }]} />);
+    fireEvent.click(screen.getByRole("button", { name: "Export CSV" }));
+    const csv = await new Promise<string>((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result));
+      reader.readAsText(createObjectURL.mock.calls[0][0]);
+    });
+    expect(csv).toContain('"Asia (all); China","Solar","2030","https://news.example/14"');
   });
 
   it("shows loading and pipeline-empty states independently of filter misses", () => {

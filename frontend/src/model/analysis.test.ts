@@ -28,6 +28,21 @@ describe("features derived from pipeline articles", () => {
     expect(applyFilters(dataset, { ...DEFAULT_FILTERS, feed: "missing" })).toEqual([]);
   });
 
+  it("combines region and energy tags with pipeline search and category filters", () => {
+    const taggedDataset: Dataset = {
+      ...dataset,
+      articles: [
+        { ...base, id: 10, title: "China expands solar generation", category: "renewables" },
+        { ...base, id: 11, title: "China expands oil production", category: "renewables" },
+        { ...base, id: 12, title: "Europe expands solar generation", category: "renewables" },
+      ],
+    };
+    const filters = { ...DEFAULT_FILTERS, region: "asia", energy: "solar", category: "renewables", query: "science", range: "7" as const };
+    expect(applyFilters(taggedDataset, filters).map((a) => a.id)).toEqual([10]);
+    expect(applyFilters(taggedDataset, { ...filters, query: "Energy Laboratory" }).map((a) => a.id)).toEqual([10]);
+    expect(applyFilters(taggedDataset, { ...filters, energy: "coal" })).toEqual([]);
+  });
+
   it("includes categories introduced by pipeline rules in controls and charts", () => {
     expect(articleCategories(dataset.articles)).toEqual(["storage", "hydrogen", "other"]);
     const result = analyze(dataset, DEFAULT_FILTERS);

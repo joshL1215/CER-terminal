@@ -70,6 +70,30 @@ describe("live pipeline dashboard", () => {
     expect(screen.queryAllByRole("article")).toHaveLength(0);
   });
 
+  it("combines dynamic pipeline topics with region and energy controls and clears them", async () => {
+    loadDataset.mockResolvedValue({ ...dataset, articles: [
+      { ...dataset.articles[0], title: "China expands solar generation", category: "renewables" },
+      { ...dataset.articles[1], title: "Europe expands oil production", category: "renewables" },
+    ] });
+    const user = userEvent.setup();
+    render(<App />);
+    await screen.findByText("Live articles");
+    await user.click(screen.getByRole("button", { name: "News intelligence" }));
+    await user.selectOptions(screen.getByRole("combobox", { name: "Category" }), "renewables");
+    await user.selectOptions(screen.getByRole("combobox", { name: "Region" }), "asia");
+    await user.selectOptions(screen.getByRole("combobox", { name: "Energy type" }), "solar");
+    await user.type(screen.getByRole("searchbox", { name: "Search articles" }), "science");
+    expect(screen.getAllByRole("article")).toHaveLength(1);
+    const article = screen.getByRole("article");
+    expect(within(article).getByRole("link", { name: "China expands solar generation" })).toBeTruthy();
+    expect(within(article).getByText("China")).toBeTruthy();
+    expect(within(article).getByText("Solar")).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "Clear filters" }));
+    expect(screen.getAllByRole("article")).toHaveLength(2);
+    expect((screen.getByRole("combobox", { name: "Region" }) as HTMLSelectElement).value).toBe("all");
+    expect((screen.getByRole("combobox", { name: "Energy type" }) as HTMLSelectElement).value).toBe("all");
+  });
+
   it("retains loaded articles after a refresh fails and supports retry", async () => {
     loadDataset.mockResolvedValueOnce(dataset).mockRejectedValueOnce(new Error("Network unavailable")).mockResolvedValueOnce(dataset);
     const user = userEvent.setup();

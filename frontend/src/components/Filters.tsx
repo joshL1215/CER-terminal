@@ -1,11 +1,18 @@
 import type { Feed } from "../data/types";
 import { DEFAULT_FILTERS, OTHER, type Filters, type RangePreset } from "../model/analysis";
+import { ENERGY, REGION_OPTIONS, tagCounts } from "../model/tags";
 import { Icon } from "./Icon";
 
 const PRESETS: { value: RangePreset; label: string }[] = [{ value: "7", label: "7 days" }, { value: "30", label: "30 days" }, { value: "90", label: "90 days" }, { value: "all", label: "All time" }];
-export function FilterRow({ filters, feeds, categories, count, onChange }: { filters: Filters; feeds: Feed[]; categories: string[]; count: number; onChange: (next: Filters) => void }) {
+type TagCounts = ReturnType<typeof tagCounts>;
+export function FilterRow({ filters, feeds, categories, count, tags, onChange }: { filters: Filters; feeds: Feed[]; categories: string[]; count: number; tags: TagCounts; onChange: (next: Filters) => void }) {
   const set = (patch: Partial<Filters>) => onChange({ ...filters, ...patch });
-  const active = filters.range !== "all" || filters.category !== "all" || filters.feed !== "all" || Boolean(filters.query);
+  const active = filters.range !== "all" || filters.category !== "all" || filters.feed !== "all" || filters.region !== "all" || filters.energy !== "all" || Boolean(filters.query);
+  // Options with no articles in the dataset are disabled, so a choice never leads to an empty page by itself.
+  const option = (def: { id: string; label: string }, counts: Map<string, number>, selected: string) => {
+    const n = counts.get(def.id) ?? 0;
+    return <option key={def.id} value={def.id} disabled={n === 0 && def.id !== selected}>{def.label} ({n})</option>;
+  };
   return (
     <section className="filter-panel" aria-label="Evidence filters">
       <div className="filter-heading">
@@ -28,6 +35,14 @@ export function FilterRow({ filters, feeds, categories, count, onChange }: { fil
           {[...feeds].sort((a, b) => a.name.localeCompare(b.name)).map((f) => <option key={f.id} value={f.id}>
             {f.name}
           </option>)}
+        </select>
+        <select aria-label="Region" value={filters.region} onChange={(e) => set({ region: e.target.value })}>
+          <option value="all">All regions</option>
+          {REGION_OPTIONS.map((r) => option(r, tags.regions, filters.region))}
+        </select>
+        <select aria-label="Energy type" value={filters.energy} onChange={(e) => set({ energy: e.target.value })}>
+          <option value="all">All energy types</option>
+          {ENERGY.map((e) => option(e, tags.energy, filters.energy))}
         </select>
         <div className="segmented" role="group" aria-label="Date range">
           {PRESETS.map((p) => <button key={p.value} aria-pressed={filters.range === p.value} onClick={() => set({ range: p.value })}>

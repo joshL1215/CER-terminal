@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Article, Feed } from "../data/types";
 import { OTHER } from "../model/analysis";
+import { tagArticle, tagLabel, ASIA_MEMBERS } from "../model/tags";
 import { Icon } from "./Icon";
 import { categoryColor } from "./VolumeChart";
 
@@ -45,7 +46,7 @@ export function ArticleFeed({ articles, feedsById, claimIds, preview = false, lo
     return oldestFirst ? [...result].reverse() : result;
   }, [articles, claimIds, signalsOnly, savedOnly, saved, oldestFirst]);
   const exportArticles = () => {
-    const rows = [["Title", "Source", "Published", "Topic", "Prototype detected peak year", "URL"], ...visible.map((a) => [a.title, feedsById.get(a.feed_id)?.name ?? a.feed_id, a.published_at ?? "", a.category ?? OTHER, claimIds.get(a.id) ?? "", a.url])];
+    const rows = [["Title", "Source", "Published", "Topic", "Regions", "Energy types", "Prototype detected peak year", "URL"], ...visible.map((a) => { const t = tagArticle(a); return [a.title, feedsById.get(a.feed_id)?.name ?? a.feed_id, a.published_at ?? "", a.category ?? OTHER, t.regions.map(tagLabel).join("; "), t.energy.map(tagLabel).join("; "), claimIds.get(a.id) ?? "", a.url]; })];
     const url = URL.createObjectURL(new Blob(["\uFEFF", rows.map((r) => r.map(csvCell).join(",")).join("\r\n")], { type: "text/csv;charset=utf-8;" }));
     const link = document.createElement("a"); link.href = url; link.download = "cer-energy-intelligence.csv"; document.body.appendChild(link); link.click(); link.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
@@ -92,6 +93,9 @@ export function ArticleFeed({ articles, feedsById, claimIds, preview = false, lo
         const cat = a.category ?? OTHER;
         const claim = claimIds.get(a.id);
         const isSaved = saved.includes(a.url);
+        const tags = tagArticle(a);
+        // Show the specific Asian country when there is one; "Asia (all)" only when nothing more specific matched.
+        const regionTags = tags.regions.filter((r) => r !== "asia" || !tags.regions.some((x) => (ASIA_MEMBERS as readonly string[]).includes(x)));
         return <article className="article" key={a.url}>
           <div className="article-accent" style={{ background: categoryColor(cat) }} />
           <div className="article-body">
@@ -117,6 +121,8 @@ export function ArticleFeed({ articles, feedsById, claimIds, preview = false, lo
                 <span className="swatch" style={{ background: categoryColor(cat) }} />
                 {cat}
               </span>
+              {regionTags.slice(0, 3).map((r) => <span className="chip tag region" key={r}>{tagLabel(r)}</span>)}
+              {tags.energy.slice(0, 3).map((e) => <span className="chip tag energy" key={e}>{tagLabel(e)}</span>)}
               {claim !== undefined && <span className="chip signal" title="Prototype peak detection — still in development; review the source before relying on it"><Icon name="signal" size={13} /> Peak signal · {claim}</span>}
             </div>
 

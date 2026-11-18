@@ -6,9 +6,9 @@ import { DistributionChart, HistoryChart, TimelineChart } from "./components/Out
 import { RegistryTable } from "./components/RegistryTable";
 import { StatTiles } from "./components/StatTiles";
 import { VolumeChart } from "./components/VolumeChart";
-import { isLiveConfigured, loadDataset, loadSample } from "./data/client";
+import { initialDataset, isLiveConfigured, loadDataset } from "./data/client";
 import type { Dataset } from "./data/types";
-import { analyze, DEFAULT_FILTERS, type Filters } from "./model/analysis";
+import { analyze, articleCategories, DEFAULT_FILTERS, type Filters } from "./model/analysis";
 import { tagCounts } from "./model/tags";
 
 type View = "overview" | "news" | "sources";
@@ -19,7 +19,8 @@ function readTheme(): "light" | "dark" {
 }
 
 export default function App() {
-  const [dataset, setDataset] = useState<Dataset>(() => loadSample());
+  const [dataset, setDataset] = useState<Dataset>(initialDataset);
+  const [hasLoaded, setHasLoaded] = useState(!isLiveConfigured);
   const [loading, setLoading] = useState(isLiveConfigured);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
@@ -32,12 +33,13 @@ export default function App() {
   useEffect(() => {
     if (!isLiveConfigured) return;
     let cancelled = false;
+    const controller = new AbortController();
     setLoading(true);
     setError(null);
-    loadDataset().then((d) => { if (!cancelled) setDataset(d); })
+    loadDataset(controller.signal).then((d) => { if (!cancelled) { setDataset(d); setHasLoaded(true); } })
       .catch((e: unknown) => { if (!cancelled) setError(e instanceof Error ? e.message : "Unable to load articles"); })
       .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
+    return () => { cancelled = true; controller.abort(); };
   }, [refreshKey]);
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
@@ -46,6 +48,9 @@ export default function App() {
 
   const analysis = useMemo(() => analyze(dataset, filters), [dataset, filters]);
   const datasetTags = useMemo(() => tagCounts(dataset.articles), [dataset.articles]);
+  const categories = useMemo(() => articleCategories(dataset.articles), [dataset.articles]);
+  const articlesLoading = loading && !hasLoaded;
+  const datasetEmpty = hasLoaded && !dataset.articles.length;
   const consensus = includeNews ? analysis.withNowcast : analysis.registryOnly;
   const shift = analysis.withNowcast.median - analysis.registryOnly.median;
   const asOf = dataset.asOf.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
@@ -99,9 +104,9 @@ export default function App() {
           <div className="header-right">
             <span className={`badge${dataset.mode === "sample" ? " sample" : ""}`}>
               <span className="dot" />
-              {loading ? "Updating articles…" : dataset.mode === "live" ? "Live articles" : "Sample data"}
+              {loading ? "Updating articles…" : error ? "Connection unavailable" : dataset.mode === "live" ? "Live articles" : "Sample data"}
             </span>
-            <span className="as-of">As of {asOf}</span>
+            {hasLoaded && <span className="as-of">As of {asOf}</span>}
             <button className="icon-button mobile-theme" aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`} onClick={() => setTheme((t) => t === "dark" ? "light" : "dark")}>
               <Icon name={theme === "dark" ? "sun" : "moon"} size={15} />
             </button>
@@ -126,7 +131,7 @@ export default function App() {
 
           {error && <div className="error" role="alert">
             <strong>Articles could not be refreshed.</strong>
-            {dataset.mode === "sample" ? "Showing the sample snapshot." : "Keeping the last loaded articles."}
+            {hasLoaded ? " Keeping the last loaded articles." : " Check the connection settings and try again."}
             <details>
               <summary>Connection details</summary>
               {error}
@@ -140,7 +145,17 @@ export default function App() {
             <button className="text-button" onClick={() => openView("sources")}>About the data <Icon name="arrow" size={14} /></button>
           </div>}
 
-          {view !== "sources" && <FilterRow filters={filters} feeds={dataset.feeds} count={analysis.articles.length} tags={datasetTags} onChange={setFilters} />}
+          {dataset.totalArticles > dataset.articles.length && <div className="sample-notice" role="status">
+            <span className="notice-symbol">i</span>
+            <span>Showing the newest {dataset.articles.length.toLocaleString()} of {dataset.totalArticles.toLocaleString()} screened articles. Search, charts, saved articles, and exports use this loaded selection.</span>
+          </div>}
+
+          {view !== "news" && <aside className="prototype-notice" aria-label="Forecasting development status">
+            <strong>Forecasting prototype — still in development</strong>
+            <p>Peak detection, news contributions, and forecast visualizations are experimental. The methods and estimates still require validation.</p>
+          </aside>}
+
+          {view !== "sources" && <FilterRow filters={filters} feeds={dataset.feeds} categories={categories} count={analysis.articles.length} tags={datasetTags} onChange={setFilters} />}
 
           <div className="view-content" key={view}>
 
@@ -148,8 +163,8 @@ export default function App() {
               <div className="outlook-grid">
                 <section className="forecast-panel" aria-label="Peak year estimate" aria-busy={loading}>
                   <div className="forecast-top">
-                    <span className="eyebrow">THE CURRENT OUTLOOK</span>
-                    <span className="forecast-tag">Model estimate</span>
+                    <span className="eyebrow">EXPERIMENTAL OUTLOOK</span>
+                    <span className="forecast-tag">Prototype</span>
                   </div>
                   <h2>Global fossil fuel peak</h2>
                   <div className="forecast-year" key={consensus.median.toFixed(1)}>
@@ -209,7 +224,7 @@ export default function App() {
                 </div>
                 <button className="text-button" onClick={() => openNews(false)}>View all articles <Icon name="arrow" size={16} /></button>
               </div>
-              <ArticleFeed articles={analysis.articles} feedsById={analysis.feedsById} claimIds={analysis.claimIds} preview onReset={() => setFilters(DEFAULT_FILTERS)} />
+              <ArticleFeed articles={analysis.articles} feedsById={analysis.feedsById} claimIds={analysis.claimIds} loading={articlesLoading} datasetEmpty={datasetEmpty} preview onReset={() => setFilters(DEFAULT_FILTERS)} />
             </>}
 
             {view === "news" && <>
@@ -242,14 +257,16 @@ export default function App() {
                   {filters.category !== "all" && <button className="text-button" onClick={() => setFilters((f) => ({ ...f, category: "all" }))}>Show all topics</button>}
                 </section>
               </div>
-              <ArticleFeed articles={analysis.articles} feedsById={analysis.feedsById} claimIds={analysis.claimIds} signalsOnly={signalsOnly} onSignalsChange={setSignalsOnly} onReset={() => { setFilters(DEFAULT_FILTERS); setSignalsOnly(false); }} />
+              <ArticleFeed articles={analysis.articles} feedsById={analysis.feedsById} claimIds={analysis.claimIds} loading={articlesLoading} datasetEmpty={datasetEmpty} signalsOnly={signalsOnly} onSignalsChange={setSignalsOnly} onReset={() => { setFilters(DEFAULT_FILTERS); setSignalsOnly(false); }} />
             </>}
 
             {view === "sources" && <>
               <RegistryTable registry={analysis.registry} />
               <section className="method-note card" aria-label="How news enters the number">
       <p className="note">
-        How news enters the number: kept articles that make a directional claim about the fossil peak ("peaked
+        This forecasting prototype is still in development. Peak detection uses text patterns, and the
+        news weights, registry inputs, and estimates still require validation. How news enters the
+        experimental estimate: kept articles that make a directional claim about the fossil peak ("peaked
         in 2025", "nearing peak", "no peak before…") are blended as one pseudo-source, capped at half the weight
         of a top institution and decaying with a 60-day half-life. The registry of published outlooks carries the
         rest. Historical consumption is approximate (OWID / Energy Institute).

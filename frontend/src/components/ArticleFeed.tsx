@@ -10,6 +10,8 @@ interface Props {
   feedsById: Map<string, Feed>;
   claimIds: Map<number, number>;
   preview?: boolean;
+  loading?: boolean;
+  datasetEmpty?: boolean;
   signalsOnly?: boolean;
   onSignalsChange?: (value: boolean) => void;
   onReset: () => void;
@@ -25,7 +27,7 @@ function csvCell(value: string | number): string {
   const text = String(value);
   return `"${(/^[=+@\-\t\r]/.test(text) ? "'" + text : text).replace(/"/g, '""')}"`;
 }
-export function ArticleFeed({ articles, feedsById, claimIds, preview = false, signalsOnly = false, onSignalsChange, onReset }: Props) {
+export function ArticleFeed({ articles, feedsById, claimIds, preview = false, loading = false, datasetEmpty = false, signalsOnly = false, onSignalsChange, onReset }: Props) {
   const [saved, setSaved] = useState(readSaved);
   const [savedOnly, setSavedOnly] = useState(false);
   const [oldestFirst, setOldestFirst] = useState(false);
@@ -44,11 +46,11 @@ export function ArticleFeed({ articles, feedsById, claimIds, preview = false, si
     return oldestFirst ? [...result].reverse() : result;
   }, [articles, claimIds, signalsOnly, savedOnly, saved, oldestFirst]);
   const exportArticles = () => {
-    const rows = [["Title", "Source", "Published", "Topic", "Regions", "Energy types", "Detected peak year", "URL"], ...visible.map((a) => { const t = tagArticle(a); return [a.title, feedsById.get(a.feed_id)?.name ?? a.feed_id, a.published_at ?? "", a.category ?? OTHER, t.regions.map(tagLabel).join("; "), t.energy.map(tagLabel).join("; "), claimIds.get(a.id) ?? "", a.url]; })];
+    const rows = [["Title", "Source", "Published", "Topic", "Regions", "Energy types", "Prototype detected peak year", "URL"], ...visible.map((a) => { const t = tagArticle(a); return [a.title, feedsById.get(a.feed_id)?.name ?? a.feed_id, a.published_at ?? "", a.category ?? OTHER, t.regions.map(tagLabel).join("; "), t.energy.map(tagLabel).join("; "), claimIds.get(a.id) ?? "", a.url]; })];
     const url = URL.createObjectURL(new Blob(["\uFEFF", rows.map((r) => r.map(csvCell).join(",")).join("\r\n")], { type: "text/csv;charset=utf-8;" }));
     const link = document.createElement("a"); link.href = url; link.download = "cer-energy-intelligence.csv"; document.body.appendChild(link); link.click(); link.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
-  return <section className={`article-section${preview ? " preview-feed" : ""}`} aria-label={preview ? "Latest articles" : "News articles"}>
+  return <section className={`article-section${preview ? " preview-feed" : ""}`} aria-label={preview ? "Latest articles" : "News articles"} aria-busy={loading}>
 
     {!preview && <div className="feed-toolbar">
       <div className="feed-controls">
@@ -69,21 +71,23 @@ export function ArticleFeed({ articles, feedsById, claimIds, preview = false, si
       </div>
     </div>}
 
+    {!preview && <p className="note">Peak signals are a prototype still in development. Detected claims and their forecast contributions require validation.</p>}
+
     {!preview && <div className="feed-count" role="status">{visible.length} article{visible.length === 1 ? "" : "s"}{signalsOnly || savedOnly ? ` · ${[signalsOnly && "peak signals", savedOnly && "saved in this browser"].filter(Boolean).join(" · ")}` : " · selected evidence"}<span>These list controls do not change the forecast.</span></div>}
 
     {storageError && <p className="note" role="status">Browser storage is unavailable. Saved articles will last for this visit only.</p>}
 
-    {!visible.length ? <div className="empty">
+    {loading && !articles.length ? <div className="empty" role="status"><h3>Loading screened articles…</h3><p>Fetching the latest available news.</p></div> : !visible.length ? <div className="empty">
       <span className="empty-icon">
         <Icon name={savedOnly ? "bookmark" : "search"} size={26} />
       </span>
       <h3>
-        {savedOnly ? "No saved articles in this selection" : signalsOnly ? "No peak signals in this selection" : "No articles found"}
+        {datasetEmpty ? "No screened articles available yet" : savedOnly ? "No saved articles in this selection" : signalsOnly ? "No peak signals in this selection" : "No articles found"}
       </h3>
       <p>
-        {savedOnly ? "Use the bookmark beside an article to save it, or broaden your filters." : "Try another topic, a wider date range, or a different search."}
+        {datasetEmpty ? "Articles appear here after the collection pipeline keeps them from active sources." : savedOnly ? "Use the bookmark beside an article to save it, or broaden your filters." : "Try another topic, a wider date range, or a different search."}
       </p>
-      <button className="ghost" onClick={() => { setSavedOnly(false); onSignalsChange?.(false); onReset(); }}>Reset filters</button>
+      {!datasetEmpty && <button className="ghost" onClick={() => { setSavedOnly(false); onSignalsChange?.(false); onReset(); }}>Reset filters</button>}
     </div> : <div className="feed">
       {visible.slice(0, preview ? 3 : limit).map((a) => {
         const cat = a.category ?? OTHER;
@@ -119,7 +123,7 @@ export function ArticleFeed({ articles, feedsById, claimIds, preview = false, si
               </span>
               {regionTags.slice(0, 3).map((r) => <span className="chip tag region" key={r}>{tagLabel(r)}</span>)}
               {tags.energy.slice(0, 3).map((e) => <span className="chip tag energy" key={e}>{tagLabel(e)}</span>)}
-              {claim !== undefined && <span className="chip signal" title="Automatically detected claim; review the source before relying on it"><Icon name="signal" size={13} /> Peak signal · {claim}</span>}
+              {claim !== undefined && <span className="chip signal" title="Prototype peak detection — still in development; review the source before relying on it"><Icon name="signal" size={13} /> Peak signal · {claim}</span>}
             </div>
 
             {a.description && <details className="article-details">
@@ -127,7 +131,7 @@ export function ArticleFeed({ articles, feedsById, claimIds, preview = false, si
               <p>
                 {a.description}
               </p>
-              {claim !== undefined && <p className="claim-note">A text pattern detected a peak claim in this article. This is a model input, not a verified forecast of total fossil fuel demand.</p>}
+              {claim !== undefined && <p className="claim-note">A prototype text rule detected this peak claim. Detection and forecast contributions are still in development and require validation against the source.</p>}
             </details>}
 
           </div>

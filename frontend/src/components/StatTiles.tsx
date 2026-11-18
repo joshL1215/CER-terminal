@@ -18,7 +18,7 @@ export function StatTiles({ analysis, consensus, onNews, onSources }: { analysis
           {(consensus.pBy2030 * 100).toFixed(0)}
           <span>%</span>
         </div>
-        <div className="delta">Probability in the selected model</div>
+        <div className="delta">Experimental prototype probability</div>
         <div className="probability-track">
           <span style={{ width: `${consensus.pBy2030 * 100}%` }} />
         </div>
@@ -57,7 +57,7 @@ export function StatTiles({ analysis, consensus, onNews, onSources }: { analysis
         <div className="value">
           {claimIds.size}
         </div>
-        <div className="delta">Articles with a detected peak claim <Icon name="arrow" size={14} /></div>
+        <div className="delta">Prototype peak-claim detection <Icon name="arrow" size={14} /></div>
       </button>
     </div>
   );

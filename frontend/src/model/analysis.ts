@@ -34,6 +34,14 @@ export const CATEGORIES = [
 ] as const;
 export const OTHER = "other";
 
+/** Keep familiar topics in a stable order and include new pipeline categories. */
+export function articleCategories(articles: Article[]): string[] {
+  const present = new Set(articles.map((a) => a.category ?? OTHER));
+  const known: string[] = CATEGORIES.filter((c) => present.delete(c));
+  const hasOther = present.delete(OTHER);
+  return [...known, ...[...present].sort(), ...(hasOther ? [OTHER] : [])];
+}
+
 export interface WeekVolume {
   label: string;
   weekStart: Date;
@@ -66,11 +74,13 @@ function weekStart(d: Date): Date {
 export function applyFilters(dataset: Dataset, filters: Filters): Article[] {
   const since = filters.range === "all" ? null : dataset.asOf.getTime() - Number(filters.range) * DAY;
   const q = filters.query.trim().toLowerCase();
+  const feedsById = new Map(dataset.feeds.map((f) => [f.id, f]));
   return dataset.articles
     .filter((a) => {
       if (since !== null) {
         if (!a.published_at) return false;
-        if (new Date(a.published_at).getTime() < since) return false;
+        const timestamp = new Date(a.published_at).getTime();
+        if (!Number.isFinite(timestamp) || timestamp < since || timestamp > dataset.asOf.getTime()) return false;
       }
       if (filters.category !== "all" && (a.category ?? OTHER) !== filters.category) return false;
       if (filters.feed !== "all" && a.feed_id !== filters.feed) return false;
@@ -79,10 +89,11 @@ export function applyFilters(dataset: Dataset, filters: Filters): Article[] {
         if (filters.region !== "all" && !tags.regions.includes(filters.region)) return false;
         if (filters.energy !== "all" && !tags.energy.includes(filters.energy)) return false;
       }
-      if (q && !`${a.title} ${a.description ?? ""}`.toLowerCase().includes(q)) return false;
+      const feed = feedsById.get(a.feed_id);
+      if (q && !`${a.title} ${a.description ?? ""} ${feed?.name ?? ""} ${a.category ?? OTHER} ${feed?.tags.join(" ") ?? ""}`.toLowerCase().includes(q)) return false;
       return true;
     })
-    .sort((a, b) => (b.published_at ?? "").localeCompare(a.published_at ?? ""));
+    .sort((a, b) => (b.published_at ? Date.parse(b.published_at) || 0 : 0) - (a.published_at ? Date.parse(a.published_at) || 0 : 0) || b.id - a.id);
 }
 
 export function analyze(dataset: Dataset, filters: Filters): Analysis {
@@ -106,6 +117,7 @@ export function analyze(dataset: Dataset, filters: Filters): Analysis {
   const weeks = new Map<number, WeekVolume>();
   for (const a of articles) {
     if (!a.published_at) continue;
+    if (!Number.isFinite(Date.parse(a.published_at))) continue;
     const ws = weekStart(new Date(a.published_at));
     const key = ws.getTime();
     let bucket = weeks.get(key);
@@ -123,8 +135,7 @@ export function analyze(dataset: Dataset, filters: Filters): Analysis {
     bucket.total += 1;
   }
   const volume = [...weeks.values()].sort((a, b) => a.weekStart.getTime() - b.weekStart.getTime());
-  const present = new Set(articles.map((a) => a.category ?? OTHER));
-  const categoriesInView = [...CATEGORIES.filter((c) => present.has(c)), ...(present.has(OTHER) ? [OTHER] : [])];
+  const categoriesInView = articleCategories(articles);
 
   return {
     articles,

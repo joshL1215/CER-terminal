@@ -4,6 +4,15 @@ React + Vite dashboard over the articles the ingest job keeps. It shows the scre
 against the question the Center cares about: **when does global fossil fuel consumption peak, and how does that
 estimate move as news comes in?**
 
+**Forecasting is a prototype still in development.** Peak-claim detection, news contributions,
+peak-year estimates, probability distributions, and reconstructed forecast timelines are experimental
+and require methodological validation. The current implementation uses text-pattern rules,
+hand-selected weights, and a static source registry that includes placeholder entries.
+
+Article collection and browsing features are implemented and tested. Live Supabase verification and
+deployment are still pending. Article coverage charts report counts from the loaded dataset;
+forecast charts display experimental model outputs.
+
 ## Run it
 
 ```sh
@@ -12,15 +21,36 @@ npm install
 npm run dev          # http://localhost:5173, bundled sample data
 ```
 
-To read live data, copy `.env.example` to `.env` and fill in the project's Supabase URL and anon key
+To read live data, copy `.env.example` to `.env.local` and fill in the project's Supabase URL and anon key
 (Supabase → Project Settings → Data API). The anon key is public by design: the database only exposes
 kept articles and active feeds to it (see [`packages/db/README.md`](../packages/db/README.md)). With no
-`.env` the app runs on `src/data/sample.json`, a snapshot of real harvested articles, so it always renders.
+live settings the app runs on `src/data/sample.json`, a snapshot of real harvested articles. Setting only
+one variable is reported as a connection error. Restart Vite after changing local settings.
 
 ```sh
 npm run build        # type-check + production build to dist/
 npm run preview
+npm test             # data access, article controls, and analysis regression tests
 ```
+
+## GitHub build settings
+
+In the repository's **Settings → Secrets and variables → Actions**, add these two secrets
+(repository variables also work):
+
+| Name | Value |
+| --- | --- |
+| `VITE_SUPABASE_URL` | Supabase project URL, e.g. `https://your-project-ref.supabase.co` |
+| `VITE_SUPABASE_ANON_KEY` | Public anon key for that same Supabase project |
+
+The [Frontend workflow](../.github/workflows/frontend.yml) runs tests, injects those settings into
+the Vite production build, and uploads `frontend-dist` as a downloadable Actions artifact. It can
+also be run manually. This builds the app; hosting/deployment is a separate step. Vite reads these
+settings **at build time**, so rebuild after changing them. Fork PRs without secrets build in sample mode.
+
+The ingest workflow continues using `DATABASE_URL` and the LLM settings. Never put a database
+connection string or service-role key into a `VITE_` setting. Apply the existing database migrations
+before using the frontend; public reads depend on their RLS policies and column grants.
 
 ## Client workspace
 
@@ -39,13 +69,16 @@ the title and summary, with no AI. They power the Region and Energy type filters
 extra CSV columns. A tag means the article *mentions* that place or energy type, not that it is mainly about it.
 Edit the patterns in `tags.ts` to change what counts.
 
-The global search, date range, topic, region, energy-type, and source filters change the article slice and its contribution
+The global search (title, summary, source name, topic, and source tags), date range, topic, region,
+energy-type, and source filters change the article slice and its contribution
 into the forecast. The static registry remains fixed. Saved/signal filters and sorting inside the
 article list only change that list; the UI labels this distinction. Dates are relative to the dataset's
 as-of date so sample snapshots remain usable.
 
 Every chart has a **Table** view. The interface supports narrow screens, keyboard focus, light/dark
-appearance, and reduced-motion preferences. Sample snapshots and failed live refreshes are labeled.
+appearance, and reduced-motion preferences. Sample snapshots, initial loading, empty pipelines,
+and failed live refreshes are labeled. Failed refreshes retain previously loaded live articles;
+an initial connection failure displays no sample articles.
 
 ## How the number is built (`src/model/`)
 
@@ -66,5 +99,14 @@ is the natural next step.
 ## Data access
 
 `src/data/client.ts` reads `articles` and `feeds` through `@supabase/supabase-js`, listing columns
-explicitly because the RLS grants are per column (`select=*` is rejected). Pagination is in pages of
-1000 up to 5000 articles.
+explicitly because the RLS grants are per column (`select=*` is rejected). RLS exposes only kept
+articles from active feeds; queries do not filter on the private `status` or `active` columns.
+Both tables are paginated, including when the project's API row limit is below 1000. Articles use
+publication date then ID for deterministic newest-first ordering, up to 5000 rows. If more rows
+exist, the UI discloses that search, charts, saved selections, and exports use the loaded subset.
+Topic choices come from the article data so new pipeline categories appear automatically.
+
+If live mode is empty, check that the ingest job has classified articles as `kept` and their feeds
+are active. Fetch-only runs (`--skip-classify`) leave new articles `pending`, which are intentionally
+invisible to the frontend. Connection errors expose details and a retry control; check that the
+Data API is enabled and the URL/key belong to the migrated project.

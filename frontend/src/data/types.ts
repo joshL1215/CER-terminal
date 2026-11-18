@@ -26,4 +26,6 @@ export interface Dataset {
   mode: "live" | "sample";
   /** When the data was produced (sample) or fetched (live). */
   asOf: Date;
+  /** Total visible rows before the browser's article limit is applied. */
+  totalArticles: number;
 }

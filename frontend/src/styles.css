@@ -434,6 +434,25 @@ h1 {
   font-weight: 600;
 }
 
+.prototype-notice {
+  margin-bottom: 22px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--status-warning);
+  border-radius: 7px;
+  background: var(--surface-1);
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.prototype-notice strong {
+  color: var(--text-primary);
+}
+
+.prototype-notice p {
+  margin: 4px 0 0;
+}
+
 .notice-symbol {
   border: 1px solid var(--text-muted);
   width: 15px;

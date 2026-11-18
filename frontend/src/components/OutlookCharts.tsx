@@ -36,7 +36,7 @@ export function HistoryChart({ consensus, dim }: { consensus: Consensus; dim?: b
   return (
     <ChartCard
       title="The long view of fossil energy"
-      subtitle={`Historical consumption · thousand TWh per year. Shading marks the central 80% peak-timing range (${fmt0(consensus.p10)}–${fmt0(consensus.p90)}).`}
+      subtitle={`Historical consumption · thousand TWh per year. Prototype forecast shading marks the central 80% peak-timing range (${fmt0(consensus.p10)}–${fmt0(consensus.p90)}).`}
       dim={dim}
       columns={[
         { key: "year", label: "Year" },
@@ -73,7 +73,7 @@ export function HistoryChart({ consensus, dim }: { consensus: Consensus; dim?: b
             stroke="var(--series-2)"
             strokeWidth={2}
             label={{
-              value: `consensus peak ${fmt0(consensus.median)}`,
+              value: `prototype peak ${fmt0(consensus.median)}`,
               position: "insideTopLeft",
               fill: "var(--text-secondary)",
               fontSize: 12,
@@ -103,7 +103,7 @@ export function DistributionChart({ consensus, dim }: { consensus: Consensus; di
   return (
     <ChartCard
       title="Where the peak year lands"
-      subtitle={`A spread of possible peak years, rather than a single deadline. ${consensus.draws.toLocaleString()} weighted model draws.`}
+      subtitle={`Prototype distribution · still in development. ${consensus.draws.toLocaleString()} weighted model draws.`}
       dim={dim}
       columns={[
         { key: "year", label: "Year" },
@@ -151,7 +151,7 @@ export function TimelineChart({ points, dim }: { points: TimelinePoint[]; dim?: 
   return (
     <ChartCard
       title="Consensus over time"
-      subtitle="Reconstructed weekly median using a fixed registry, compared with the effect of accumulating news."
+      subtitle="Prototype reconstruction · still in development. Weekly medians compare a fixed registry with accumulating news."
       dim={dim}
       columns={[
         { key: "label", label: "Week of" },
